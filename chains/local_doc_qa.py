@@ -1,9 +1,10 @@
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from vectorstores import MyFAISS
-from langchain.document_loaders import UnstructuredFileLoader, TextLoader, CSVLoader
+from langchain.document_loaders import UnstructuredFileLoader, TextLoader, CSVLoader, DirectoryLoader
 from configs.model_config import *
-import datetime
-from textsplitter import ChineseTextSplitter
+from datetime import datetime
+from textsplitter import ChineseTextSplitter, AliTextSplitter
+from langchain.text_splitter import TokenTextSplitter
 from typing import List
 from utils import torch_gc
 from tqdm import tqdm
@@ -63,9 +64,16 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         loader = UnstructuredFileLoader(filepath, mode="elements")
         docs = loader.load()
     elif filepath.lower().endswith(".txt"):
-        loader = TextLoader(filepath, autodetect_encoding=True)
-        textsplitter = ChineseTextSplitter(pdf=False, sentence_size=sentence_size)
-        docs = loader.load_and_split(textsplitter)
+        # loader = TextLoader(filepath, autodetect_encoding=True)
+        # textsplitter = ChineseTextSplitter(pdf=False, sentence_size=sentence_size)
+        # docs = loader.load_and_split(textsplitter)
+        loader = TextLoader(filepath)
+        # 将数据转成 document 对象，每个文件会作为一个 document
+        documents = loader.load()
+        # text_splitter = CharacterTextSplitter(separator='\n', chunk_size=sentence_size, chunk_overlap=0)
+        text_splitter = TokenTextSplitter(chunk_size=sentence_size, chunk_overlap=0)
+        docs = text_splitter.split_documents(documents)
+
     elif filepath.lower().endswith(".pdf"):
         # 暂且将paddle相关的loader改为动态加载，可以在不上传pdf/image知识文件的前提下使用protobuf=4.x
         from loader import UnstructuredPaddlePDFLoader
@@ -179,11 +187,14 @@ class LocalDocQA:
 
         else:
             docs = []
+            index=0
             for file in filepath:
                 try:
                     docs += load_file(file)
                     logger.info(f"{file} 已成功加载")
                     loaded_files.append(file)
+                    print(str(datetime.now())+"\t"+str(index)+"\t"+str(file)+"已成功加载")
+                    index+=1
                 except Exception as e:
                     logger.error(e)
                     logger.info(f"{file} 未能成功加载")
@@ -324,6 +335,14 @@ class LocalDocQA:
                                     vs_path):
         vector_store = load_vector_store(vs_path, self.embeddings)
         return vector_store
+
+    def get_knowledge_based_answer(self, query, vs_path, chat_history=[], streaming: bool = STREAMING):
+        vector_store = load_vector_store(vs_path, self.embeddings)
+        vector_store.chunk_size = self.chunk_size
+        vector_store.chunk_conent = self.chunk_conent
+        vector_store.score_threshold = self.score_threshold
+        related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
+        torch_gc()
 
 
 if __name__ == "__main__":

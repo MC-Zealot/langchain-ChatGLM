@@ -1,13 +1,21 @@
 import torch.cuda
 import torch.backends
 import os
-import logging
+
 import uuid
 
-LOG_FORMAT = "%(levelname) -5s %(asctime)s" "-1d: %(message)s"
+# LOG_FORMAT = "%(levelname) -5s %(asctime)s" "-1d: %(message)s"
+# logging.basicConfig(format=LOG_FORMAT)
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+# LOG_FORMAT = "%(levelname) -5s %(asctime)s" "-1d: %(message)s"
+import logging
 logger = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter("%(asctime)s %(filename)s %(funcName)s[line:%(lineno)d]%(levelname)s - %(message)s"))
+logger.addHandler(handler)
 logger.setLevel(logging.INFO)
-logging.basicConfig(format=LOG_FORMAT)
+logger.info("logger config is done")
 
 # 在以下字典中修改属性值，以指定本地embedding模型存储位置
 # 如将 "text2vec": "GanymedeNil/text2vec-large-chinese" 修改为 "text2vec": "User/Downloads/text2vec-large-chinese"
@@ -27,7 +35,7 @@ EMBEDDING_MODEL = "text2vec"
 
 # Embedding running device,可以设置cpu
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-EMBEDDING_DEVICE = "cpu"#强制CPU
+# EMBEDDING_DEVICE = "cpu"#强制CPU
 
 # supported LLM models
 # llm_model_dict 处理了loader的一些预设行为，如加载位置，模型名称，模型处理器实例
@@ -71,7 +79,7 @@ PROMPT_TEMPLATE = """已知信息：
 CACHED_VS_NUM = 1
 
 # 文本分句长度
-SENTENCE_SIZE = 100
+SENTENCE_SIZE = 300
 
 # 匹配后单段上下文长度
 CHUNK_SIZE = 250
@@ -83,7 +91,7 @@ LLM_HISTORY_LEN = 3
 VECTOR_SEARCH_TOP_K = 5
 
 # 知识检索内容相关度 Score, 数值范围约为0-1100，如果为0，则不生效，建议设置为500左右，经测试设置为小于500时，匹配结果更精准
-VECTOR_SEARCH_SCORE_THRESHOLD = 500
+VECTOR_SEARCH_SCORE_THRESHOLD = 1100
 
 NLTK_DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "nltk_data")
 

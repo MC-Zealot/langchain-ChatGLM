@@ -1,6 +1,9 @@
+# import os
+# # os.environ['NUMEXPR_MAX_THREADS'] = '12'
+
 from configs.model_config import *
 from chains.local_doc_qa import LocalDocQA
-import os
+
 import nltk
 from models.loader.args import parser
 import models.shared as shared
@@ -10,56 +13,62 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
 
+
+
 '''
 1.保存数据到向量库
 2.读取向量库，并且开始回答问题
 '''
 def main():
-
+    print("========================")
+    logger.info("begins")
+    logger.info("logger config is done")
+    print("========================")
     llm_model_ins = shared.loaderLLM()
     llm_model_ins.history_len = LLM_HISTORY_LEN
-
     local_doc_qa = LocalDocQA()
     local_doc_qa.init_cfg(llm_model=llm_model_ins,
                           embedding_model=EMBEDDING_MODEL,
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
     # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store"
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_tmp"
     # local_doc_qa.load_vector_store_by_vspath(vs_path)
-    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt'
-    file_list=[]
-    for i, j, k in os.walk(filePath):
-        # print(i, j, k)
-        index = 0
-        while index < len(k):
-            file_path=str(i)+"/"+k[index]
-            # print(file_path)
-            file_list.append(file_path)
-            index+=1
-    # print("file_list len: ", len(file_list))
-    # exit(0)
+    # filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_tmp'
+    # file_list=[]
+    # # for i, j, k in os.walk(filePath):
+    # #     # print(i, j, k)
+    # #     index = 0
+    # #     while index < len(k):
+    # #         file_path=str(i)+"/"+k[index]
+    # #         # print(file_path)
+    # #         file_list.append(file_path)
+    # #         index+=1
+    # # # print("file_list len: ", len(file_list))
+    # # # exit(0)
+    # #
+    # # filepath = file_list
+    # # # filepath错误的返回为None, 如果直接用原先的vs_path,_ = local_doc_qa.init_knowledge_vector_store(filepath)
+    # # # 会直接导致TypeError: cannot unpack non-iterable NoneType object而使得程序直接退出
+    # # # 因此需要先加一层判断，保证程序能继续运行
+    # # temp, loaded_files = local_doc_qa.init_knowledge_vector_store(filepath, vs_path)
+    # # if temp is not None:
+    # #     vs_path = temp
+    # #     # 如果loaded_files和len(filepath)不一致，则说明部分文件没有加载成功
+    # #     # 如果是路径错误，则应该支持重新加载
+    # #     if len(loaded_files) != len(filepath):
+    # #         reload_flag = eval(input("部分文件加载失败，若提示路径不存在，可重新加载，是否重新加载，输入True或False: "))
+    # #         print("len(loaded_files): ", len(loaded_files))
+    # #         print("len(filepath): ", len(filepath))
+    # #         if reload_flag:
+    # #             vs_path = None
+    # #             exit(0)
+    # #
+    # #     print(f"the loaded vs_path is 加载的vs_path为: {vs_path}")
+    # # else:
+    # #     print("load file failed, re-input your local knowledge file path 请重新输入本地知识文件路径")
 
-    filepath = file_list
-    # filepath错误的返回为None, 如果直接用原先的vs_path,_ = local_doc_qa.init_knowledge_vector_store(filepath)
-    # 会直接导致TypeError: cannot unpack non-iterable NoneType object而使得程序直接退出
-    # 因此需要先加一层判断，保证程序能继续运行
-    temp, loaded_files = local_doc_qa.init_knowledge_vector_store(filepath)
-    if temp is not None:
-        vs_path = temp
-        # 如果loaded_files和len(filepath)不一致，则说明部分文件没有加载成功
-        # 如果是路径错误，则应该支持重新加载
-        if len(loaded_files) != len(filepath):
-            reload_flag = eval(input("部分文件加载失败，若提示路径不存在，可重新加载，是否重新加载，输入True或False: "))
-            print("len(loaded_files): ", len(loaded_files))
-            print("len(filepath): ", len(filepath))
-            if reload_flag:
-                vs_path = None
-                exit(0)
 
-        print(f"the loaded vs_path is 加载的vs_path为: {vs_path}")
-    else:
-        print("load file failed, re-input your local knowledge file path 请重新输入本地知识文件路径")
 
 
     # while not vs_path:
