@@ -320,6 +320,11 @@ class LocalDocQA:
         else:
             return [os.path.split(doc)[-1] for doc in docs]
 
+    def load_vector_store_by_vspath(self,
+                                    vs_path):
+        vector_store = load_vector_store(vs_path, self.embeddings)
+        return vector_store
+
 
 if __name__ == "__main__":
     # 初始化消息

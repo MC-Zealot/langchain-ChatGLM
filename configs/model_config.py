@@ -25,8 +25,9 @@ embedding_model_dict = {
 # Embedding model name
 EMBEDDING_MODEL = "text2vec"
 
-# Embedding running device
+# Embedding running device,可以设置cpu
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+EMBEDDING_DEVICE = "cpu"#强制CPU
 
 # supported LLM models
 # llm_model_dict 处理了loader的一些预设行为，如加载位置，模型名称，模型处理器实例
