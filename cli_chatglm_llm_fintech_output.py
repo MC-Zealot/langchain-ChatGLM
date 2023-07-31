@@ -34,6 +34,7 @@ def main():
                           top_k=VECTOR_SEARCH_TOP_K)
     # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
     vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_tmp"
+    # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_v1"
 
     history = []
     ret=[]
@@ -57,11 +58,12 @@ def main():
             # print("res: ",res)
             questions_dict['answer']=str(res)
             ret.append(questions_dict)
-    for line in ret:
-        print(line)
 
 
-
+    with open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json.test', 'w', encoding="utf8") as f:
+        for line in ret:
+            ret = json.dumps(line, ensure_ascii=False)
+            f.write(str(ret)+'\n')
 
 if __name__ == "__main__":
 #     # 通过cli.py调用cli_demo时需要在cli.py里初始化模型，否则会报错：
