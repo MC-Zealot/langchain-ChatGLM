@@ -12,8 +12,11 @@ local_doc_qa.init_cfg(llm_model=None,
                           top_k=VECTOR_SEARCH_TOP_K)
 vector_store = MyFAISS.load_local(vs_path, local_doc_qa.embeddings)
 vector_store.chunk_size = local_doc_qa.chunk_size
-vector_store.chunk_conent = local_doc_qa.chunk_conent
-vector_store.score_threshold = local_doc_qa.score_threshold
-related_docs_with_score = vector_store.similarity_search_with_score(query, k=local_doc_qa.top_k)
+vector_store.chunk_conent = False
+vector_store.score_threshold = 800
+related_docs_with_score = vector_store.similarity_search(query)
 print(related_docs_with_score)
+docs = vector_store.list_docs()
+print(len(docs))
+print(docs[0])
 torch_gc()
