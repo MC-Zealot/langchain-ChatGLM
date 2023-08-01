@@ -13,7 +13,7 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
-
+import json
 
 
 '''
@@ -38,7 +38,7 @@ def main():
 
     history = []
     ret=[]
-    import json
+
 
     with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json.test", "r") as f:
         lines = f.readlines()
