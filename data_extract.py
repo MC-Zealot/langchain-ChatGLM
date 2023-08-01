@@ -17,14 +17,15 @@ def alter(file_old, file_new):
                 questions_dict = json.loads(line)
             except Exception:
                 print("error json: "+line)
-
+            if 'inside' not in questions_dict:
+                continue
             questions_content = questions_dict['inside']+"\n"
             f2.write(questions_content)
         f1.close()
         f2.close()
 
-input_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_tmp/"
-output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_tmp_extract/"
+input_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_p1/"
+output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract/"
 # file_path="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt"
 # file_path_new="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt.tmp"
 
@@ -37,7 +38,7 @@ for i, j, k in os.walk(filePath):
     index = 0
     while index < len(k):
         file_path=str(i)+"/"+k[index]
-        print(file_path)
+        print(str(index)+"\t"+file_path)
         file_name=k[index]
         file_list.append(file_path)
         alter(file_path, output_path + file_name)
