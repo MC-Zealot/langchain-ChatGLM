@@ -22,6 +22,7 @@ from langchain.chains.base import Chain
 import multiprocessing
 
 
+
 # patch HuggingFaceEmbeddings to make it hashable
 def _embeddings_hash(self):
     return hash(self.model_name)
@@ -164,11 +165,11 @@ class LocalDocQA:
                 file = os.path.split(filepath)[-1]
                 try:
                     docs = load_file(filepath, sentence_size)
-                    logger.info(f"{file} 已成功加载")
+                    logger.error(f"{file} 已成功加载")
                     loaded_files.append(filepath)
                 except Exception as e:
                     logger.error(e)
-                    logger.info(f"{file} 未能成功加载")
+                    logger.error(f"{file} 未能成功加载")
                     return None
             elif os.path.isdir(filepath):
                 docs = []
@@ -181,9 +182,9 @@ class LocalDocQA:
                         failed_files.append(file)
 
                 if len(failed_files) > 0:
-                    logger.info("以下文件未能成功加载：")
+                    logger.error("以下文件未能成功加载：")
                     for file in failed_files:
-                        logger.info(f"{file}\n")
+                        logger.error(f"{file}\n")
 
         else:
             docs = []
@@ -197,17 +198,17 @@ class LocalDocQA:
             # for file in filepath:
             #     try:
             #         docs += load_file(file)
-            #         logger.info(f"{file} 已成功加载")
+            #         logger.error(f"{file} 已成功加载")
             #         loaded_files.append(file)
             #         print(str(datetime.now())+"\t"+str(index)+"\t"+str(file)+"已成功加载")
             #         index+=1
             #     except Exception as e:
             #         logger.error(e)
-            #         logger.info(f"{file} 未能成功加载")
+            #         logger.error(f"{file} 未能成功加载")
             print("docs type:", type(docs))
             print("docs type:", type(docs[0]))
         if len(docs) > 0:
-            logger.info("文件加载完毕，正在生成向量库")
+            logger.error(str(datetime.now())+"\t"+"文件加载完毕，正在生成向量库")
             print("文件加载完毕，正在生成向量库")
             if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
                 vector_store = load_vector_store(vs_path, self.embeddings)
@@ -215,23 +216,46 @@ class LocalDocQA:
                 torch_gc()
             else:
                 if not vs_path:
-                    vs_path = os.path.join(KB_ROOT_PATH,
-                                           f"""{"".join(lazy_pinyin(os.path.splitext(file)[0]))}_FAISS_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}""",
-                                           "vector_store")
-                vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
-                torch_gc()
+                    vs_path = os.path.join(KB_ROOT_PATH, f"""{"".join(lazy_pinyin(os.path.splitext(file)[0]))}_FAISS_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}""", "vector_store")
+
+                # vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
+                # torch_gc()
+
+                # 分批处理文本，应对大文本一次性处理导致进程终止的问题
+                batch_size = 10000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
+                batch_idx = 1
+                docs_len = len(docs)
+                logger.error("docs len: " + str(len(docs)))
+                for i in range(0, docs_len, batch_size):
+                    if i + batch_size >= docs_len:
+                        next_i = docs_len - 1
+                    else:
+                        next_i = i + batch_size
+                    batch_docs = docs[i: next_i]
+                    logger.error(str(datetime.now())+"\t"+f"Building vector db from {batch_idx} batch docs and {i} doc")
+                    if i == 0:
+                        vector_store = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
+                        logger.error(str(datetime.now())+"\t"+"Torch gc after docs vector store loading")
+                        torch_gc()
+                    else:
+                        vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
+                        # logger.error(str(datetime.now())+"\t"+f"Merging vector db, batch {batch_idx}")
+                        vector_store.merge_from(vector_store_append)  # 合并向量库
+                        # print("Torch gc after merging vector db")
+                        torch_gc()
+                    batch_idx += 1
 
             vector_store.save_local(vs_path)
             return vs_path, loaded_files
         else:
-            logger.info("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
+            logger.error("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
 
             return None, loaded_files
 
     def one_knowledge_add(self, vs_path, one_title, one_conent, one_content_segmentation, sentence_size):
         try:
             if not vs_path or not one_title or not one_conent:
-                logger.info("知识库添加错误，请确认知识库名字、标题、内容是否正确！")
+                logger.error("知识库添加错误，请确认知识库名字、标题、内容是否正确！")
                 return None, [one_title]
             docs = [Document(page_content=one_conent + "\n", metadata={"source": one_title})]
             if not one_content_segmentation:
@@ -356,12 +380,12 @@ class LocalDocQA:
     def execute_task(self, file):
         try:
             doc = load_file(file)
-            print(f"{file} 已成功加载123....")
-            logger.info(f"{file} 已成功加载123")
+            # print(f"{file} 已成功加载123....")
+            # logger.error(f"{file} 已成功加载1233")
             return doc
         except Exception as e:
             logger.error(e)
-            logger.info(f"{file} 未能成功加载")
+            logger.error(f"{file} 未能成功加载")
 
     def multi_run(self, filepath):
         manager = multiprocessing.Manager()
@@ -409,5 +433,5 @@ if __name__ == "__main__":
                    # f"""相关度：{doc.metadata['score']}\n\n"""
                    for inum, doc in
                    enumerate(resp["source_documents"])]
-    logger.info("\n\n" + "\n\n".join(source_text))
+    logger.error("\n\n" + "\n\n".join(source_text))
     pass
