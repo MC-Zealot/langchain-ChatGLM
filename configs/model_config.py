@@ -31,11 +31,11 @@ embedding_model_dict = {
 }
 
 # Embedding model name
-EMBEDDING_MODEL = "text2vec"
+EMBEDDING_MODEL = "text2vec-base"
 
 # Embedding running device,可以设置cpu
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-# EMBEDDING_DEVICE = "cpu"#强制CPU
+# EMBEDDING_DEVICE = "cpu"#强制CPU,非常非常慢，gpu消耗的时间10倍以上
 
 # supported LLM models
 # llm_model_dict 处理了loader的一些预设行为，如加载位置，模型名称，模型处理器实例
@@ -79,7 +79,7 @@ PROMPT_TEMPLATE = """已知信息：
 CACHED_VS_NUM = 1
 
 # 文本分句长度
-SENTENCE_SIZE = 300
+SENTENCE_SIZE = 500
 
 # 匹配后单段上下文长度
 CHUNK_SIZE = 250

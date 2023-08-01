@@ -96,7 +96,7 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         docs = loader.load_and_split(text_splitter=textsplitter)
     if using_zh_title_enhance:
         docs = zh_title_enhance(docs)
-    write_check_file(filepath, docs)
+    write_check_file(filepath, docs) #不知道在干啥~~~~
     return docs
 
 
@@ -147,8 +147,7 @@ class LocalDocQA:
                  top_k=VECTOR_SEARCH_TOP_K,
                  ):
         self.llm_model_chain = llm_model
-        self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[embedding_model],
-                                                model_kwargs={'device': embedding_device})
+        self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[embedding_model], model_kwargs={'device': embedding_device})
         self.top_k = top_k
 
     def init_knowledge_vector_store(self,
@@ -188,8 +187,13 @@ class LocalDocQA:
 
         else:
             docs = []
-            index=0
-            docs = self.multi_run(filepath)
+
+            docss = self.multi_run(filepath)
+            for tmp_docs in docss:
+                docs.extend(tmp_docs)
+
+
+            # index = 0
             # for file in filepath:
             #     try:
             #         docs += load_file(file)
@@ -200,6 +204,8 @@ class LocalDocQA:
             #     except Exception as e:
             #         logger.error(e)
             #         logger.info(f"{file} 未能成功加载")
+            print("docs type:", type(docs))
+            print("docs type:", type(docs[0]))
         if len(docs) > 0:
             logger.info("文件加载完毕，正在生成向量库")
             print("文件加载完毕，正在生成向量库")

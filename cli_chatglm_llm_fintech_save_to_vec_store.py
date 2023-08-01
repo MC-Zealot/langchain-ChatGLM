@@ -12,7 +12,7 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
-
+from datetime import datetime
 
 
 '''
@@ -32,9 +32,11 @@ def main():
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
     # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_v1"
+    a = datetime.now()
+
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
     # local_doc_qa.load_vector_store_by_vspath(vs_path)
-    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_p1'
+    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract'
     file_list=[]
     for i, j, k in os.walk(filePath):
         # print(i, j, k)
@@ -44,6 +46,7 @@ def main():
             # print(file_path)
             file_list.append(file_path)
             index+=1
+        break #非递归
     # print("file_list len: ", len(file_list))
     # exit(0)
 
@@ -56,18 +59,20 @@ def main():
         vs_path = temp
         # 如果loaded_files和len(filepath)不一致，则说明部分文件没有加载成功
         # 如果是路径错误，则应该支持重新加载
-        if len(loaded_files) != len(filepath):
-            reload_flag = eval(input("部分文件加载失败，若提示路径不存在，可重新加载，是否重新加载，输入True或False: "))
-            print("len(loaded_files): ", len(loaded_files))
-            print("len(filepath): ", len(filepath))
-            if reload_flag:
-                vs_path = None
-                exit(0)
+        # if len(loaded_files) != len(filepath):
+        #     reload_flag = eval(input("部分文件加载失败，若提示路径不存在，可重新加载，是否重新加载，输入True或False: "))
+        #     print("len(loaded_files): ", len(loaded_files))
+        #     print("len(filepath): ", len(filepath))
+        #     if reload_flag:
+        #         vs_path = None
+        #         exit(0)
 
         print(f"the loaded vs_path is 加载的vs_path为: {vs_path}")
     else:
         print("load file failed, re-input your local knowledge file path 请重新输入本地知识文件路径")
 
+    b = datetime.now()
+    print("加载文件个数: "+str(len(file_list))+", 到数据库总耗时"+str((b-a).seconds))
 
 
 
