@@ -19,6 +19,7 @@ from langchain.docstore.document import Document
 from functools import lru_cache
 from textsplitter.zh_title_enhance import zh_title_enhance
 from langchain.chains.base import Chain
+import multiprocessing
 
 
 # patch HuggingFaceEmbeddings to make it hashable
@@ -188,18 +189,20 @@ class LocalDocQA:
         else:
             docs = []
             index=0
-            for file in filepath:
-                try:
-                    docs += load_file(file)
-                    logger.info(f"{file} 已成功加载")
-                    loaded_files.append(file)
-                    print(str(datetime.now())+"\t"+str(index)+"\t"+str(file)+"已成功加载")
-                    index+=1
-                except Exception as e:
-                    logger.error(e)
-                    logger.info(f"{file} 未能成功加载")
+            docs = self.multi_run(filepath)
+            # for file in filepath:
+            #     try:
+            #         docs += load_file(file)
+            #         logger.info(f"{file} 已成功加载")
+            #         loaded_files.append(file)
+            #         print(str(datetime.now())+"\t"+str(index)+"\t"+str(file)+"已成功加载")
+            #         index+=1
+            #     except Exception as e:
+            #         logger.error(e)
+            #         logger.info(f"{file} 未能成功加载")
         if len(docs) > 0:
             logger.info("文件加载完毕，正在生成向量库")
+            print("文件加载完毕，正在生成向量库")
             if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
                 vector_store = load_vector_store(vs_path, self.embeddings)
                 vector_store.add_documents(docs)
@@ -343,6 +346,33 @@ class LocalDocQA:
         vector_store.score_threshold = self.score_threshold
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
         torch_gc()
+
+    def execute_task(self, file):
+        try:
+            doc = load_file(file)
+            print(f"{file} 已成功加载123....")
+            logger.info(f"{file} 已成功加载123")
+            return doc
+        except Exception as e:
+            logger.error(e)
+            logger.info(f"{file} 未能成功加载")
+
+    def multi_run(self, filepath):
+        manager = multiprocessing.Manager()
+        task_list = manager.list(filepath)  # 共享的任务列表
+        # 创建进程池
+        pool = multiprocessing.Pool(6)
+        # 使用进程池中的进程来执行共享的任务列表，并获取返回值
+        results = pool.map_async(self.execute_task, task_list)
+        # 等待所有任务执行完成
+        results.wait()
+        # 获取每个任务的返回值
+        output = results.get()
+        # print(output) # 打印输出结果
+        # 关闭进程池
+        pool.close()
+        pool.join()
+        return output
 
 
 if __name__ == "__main__":
