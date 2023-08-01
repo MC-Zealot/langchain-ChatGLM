@@ -361,7 +361,7 @@ class LocalDocQA:
         manager = multiprocessing.Manager()
         task_list = manager.list(filepath)  # 共享的任务列表
         # 创建进程池
-        pool = multiprocessing.Pool(6)
+        pool = multiprocessing.Pool(10)
         # 使用进程池中的进程来执行共享的任务列表，并获取返回值
         results = pool.map_async(self.execute_task, task_list)
         # 等待所有任务执行完成
