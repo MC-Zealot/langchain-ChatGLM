@@ -309,8 +309,7 @@ class LocalDocQA:
         else:
             prompt = query
 
-        answer_result_stream_result = self.llm_model_chain(
-            {"prompt": prompt, "history": chat_history, "streaming": streaming})
+        answer_result_stream_result = self.llm_model_chain({"prompt": prompt, "history": chat_history, "streaming": streaming})
 
         for answer_result in answer_result_stream_result['answer_result_stream']:
             resp = answer_result.llm_output["answer"]

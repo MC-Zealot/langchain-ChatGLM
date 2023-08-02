@@ -30,12 +30,9 @@ class OutPutPrompts:
     # llm_model_ins = shared.loaderLLM()
     # llm_model_ins.history_len = LLM_HISTORY_LEN
 
-    # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
-
-    # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_v1"
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
+    vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
     logger.error("local_doc_qa init is done")
-    def init_prompts(self, vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"):
+    def init_prompts(self, vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"):
         local_doc_qa = LocalDocQA()
         local_doc_qa.init_cfg(llm_model=None,
                               embedding_model=EMBEDDING_MODEL,
@@ -59,7 +56,7 @@ class OutPutPrompts:
             logger.error(e)
             logger.error(f"{line} 未能成功加载")
 
-    def multi_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json.100"):
+    def multi_run(self, filepath="~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json.100"):
         manager = multiprocessing.Manager()
         with open(filepath, "r") as f1:
             lines = f1.readlines()
@@ -79,7 +76,7 @@ class OutPutPrompts:
             f1.close()
         return output
 
-    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
+    def single_run(self, filepath="~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
         with open(filepath, "r") as f1:
             lines = f1.readlines()
             res =[]
@@ -123,7 +120,7 @@ if __name__ == "__main__":
     ret = opp.single_run()
     index = 0
     # exit(0)
-    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts.json", "w", encoding="utf8") as f2:
+    with open("~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts.json", "w", encoding="utf8") as f2:
         for line in ret:
             f2.write(str(line) + '\n')
             logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")

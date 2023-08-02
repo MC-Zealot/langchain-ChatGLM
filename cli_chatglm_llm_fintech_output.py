@@ -33,16 +33,16 @@ def main():
                           embedding_model=EMBEDDING_MODEL,
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
-    # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
+    # vs_path = "~/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
+    vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
     # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_v1"
     logger.error("local_doc_qa init is done")
         # history = []
         # ret=[]
 
     index = 0
-    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json", "r") as f1, \
-        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json', 'w', encoding="utf8") as f2:
+    with open("~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json", "r") as f1, \
+        open('~/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json', 'w', encoding="utf8") as f2:
         lines = f1.readlines()
         for line in lines:
             questions_dict = json.loads(line)
@@ -69,7 +69,7 @@ def main():
         f2.close()
 
 
-    # with open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json.test', 'w', encoding="utf8") as f:
+    # with open('~/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json.test', 'w', encoding="utf8") as f:
     #     for line in ret:
     #         ret = json.dumps(line, ensure_ascii=False)
     #         f.write(str(ret)+'\n')

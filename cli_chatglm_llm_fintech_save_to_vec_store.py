@@ -31,12 +31,12 @@ def main():
                           embedding_model=EMBEDDING_MODEL,
                           embedding_device=EMBEDDING_DEVICE,
                           top_k=VECTOR_SEARCH_TOP_K)
-    # vs_path = "/home/zealot/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
+    # vs_path = "~/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
     a = datetime.now()
 
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
+    vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
     # local_doc_qa.load_vector_store_by_vspath(vs_path)
-    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract'
+    filePath = '~/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract'
     file_list=[]
     for i, j, k in os.walk(filePath):
         # print(i, j, k)
