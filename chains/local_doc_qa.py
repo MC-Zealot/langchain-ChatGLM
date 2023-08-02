@@ -320,6 +320,16 @@ class LocalDocQA:
                         "source_documents": ''}
             yield response
 
+    def get_answer_by_prompt(self, query, chat_history=[], streaming: bool = STREAMING):
+        answer_result_stream_result = self.llm_model_chain({"prompt": query, "history": chat_history, "streaming": streaming})
+
+        for answer_result in answer_result_stream_result['answer_result_stream']:
+            resp = answer_result.llm_output["answer"]
+            response = {"query": '',
+                        "result": resp,
+                        "source_documents": ''}
+            yield response
+
     def get_prompt_based_query(self, query, vs_path ):
         vector_store = load_vector_store(vs_path, self.embeddings)
         vector_store.chunk_size = self.chunk_size

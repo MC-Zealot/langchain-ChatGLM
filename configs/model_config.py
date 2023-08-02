@@ -20,7 +20,7 @@ logger.info("logger config is done")
 # 在以下字典中修改属性值，以指定本地embedding模型存储位置
 # 如将 "text2vec": "GanymedeNil/text2vec-large-chinese" 修改为 "text2vec": "User/Downloads/text2vec-large-chinese"
 # 此处请写绝对路径
-embedding_model_path= "~/yizhou/git"
+embedding_model_path= "/home/zealot/yizhou/git"
 embedding_model_dict = {
     "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
     "ernie-base": "nghuyong/ernie-3.0-base-zh",
@@ -173,8 +173,8 @@ llm_model_dict = {
     },
     "chatglm2-6b-int4": {
         "name": "chatglm2-6b-int4",
-        "pretrained_model_name": "~/yizhou/git/chatglm2-6b-int4",
-        "local_model_path": '~/yizhou/git/chatglm2-6b-int4',
+        "pretrained_model_name": "/home/zealot/yizhou/git/chatglm2-6b-int4",
+        "local_model_path": '/home/zealot/yizhou/git/chatglm2-6b-int4',
         "provides": "ChatGLMLLMChain"
     },
     "chatglm2-6b-int8": {
