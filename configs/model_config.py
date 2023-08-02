@@ -76,7 +76,7 @@ PROMPT_TEMPLATE = """已知信息：
 根据上述已知信息，简洁和专业的来回答用户的问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题” 或 “没有提供足够的相关信息”，不允许在答案中添加编造成分，答案请使用中文。 问题是：{question}"""
 
 # 缓存知识库数量,如果是ChatGLM2,ChatGLM2-int4,ChatGLM2-int8模型若检索效果不好可以调成’10’
-CACHED_VS_NUM = 1
+CACHED_VS_NUM = 10
 
 # 文本分句长度
 SENTENCE_SIZE = 500
@@ -88,7 +88,7 @@ CHUNK_SIZE = 250
 LLM_HISTORY_LEN = 3
 
 # 知识库检索时返回的匹配内容条数
-VECTOR_SEARCH_TOP_K = 20
+VECTOR_SEARCH_TOP_K = 3
 
 # 知识检索内容相关度 Score, 数值范围约为0-1100，如果为0，则不生效，建议设置为500左右，经测试设置为小于500时，匹配结果更精准
 VECTOR_SEARCH_SCORE_THRESHOLD = 500

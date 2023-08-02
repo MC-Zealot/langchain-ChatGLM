@@ -297,6 +297,44 @@ class LocalDocQA:
                         "source_documents": related_docs_with_score}
             yield response, history
 
+    def get_knowledge_based_answer_v2(self, query, vs_path, chat_history=[], streaming: bool = STREAMING):
+        vector_store = load_vector_store(vs_path, self.embeddings)
+        vector_store.chunk_size = self.chunk_size
+        vector_store.chunk_conent = self.chunk_conent
+        vector_store.score_threshold = self.score_threshold
+        related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
+        torch_gc()
+        if len(related_docs_with_score) > 0:
+            prompt = generate_prompt(related_docs_with_score, query)
+        else:
+            prompt = query
+
+        answer_result_stream_result = self.llm_model_chain(
+            {"prompt": prompt, "history": chat_history, "streaming": streaming})
+
+        for answer_result in answer_result_stream_result['answer_result_stream']:
+            resp = answer_result.llm_output["answer"]
+            # history = answer_result.history
+            # history[-1][0] = query
+            response = {"query": '',
+                        "result": resp,
+                        "source_documents": ''}
+            yield response
+
+    def get_prompt_based_query(self, query, vs_path ):
+        vector_store = load_vector_store(vs_path, self.embeddings)
+        vector_store.chunk_size = self.chunk_size
+        vector_store.chunk_conent = self.chunk_conent
+        vector_store.score_threshold = self.score_threshold
+        related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
+        torch_gc()
+        if len(related_docs_with_score) > 0:
+            prompt = generate_prompt(related_docs_with_score, query)
+        else:
+            prompt = query
+
+        return prompt
+
     # query      查询内容
     # vs_path    知识库路径
     # chunk_conent   是否启用上下文关联
