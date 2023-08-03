@@ -122,6 +122,13 @@ def generate_prompt(related_docs: List[str],
     prompt = prompt_template.replace("{question}", query).replace("{context}", context)
     return prompt
 
+def generate_prompt_v2(related_docs: List[str],
+                    query: str,
+                    prompt_template: str = PROMPT_TEMPLATE_V2, ) -> str:
+    context = "\n".join([doc.page_content for doc in related_docs])
+    prompt = prompt_template.replace("{question}", query).replace("{context}", context)
+    return prompt
+
 
 def search_result2docs(search_results):
     docs = []
@@ -338,7 +345,7 @@ class LocalDocQA:
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
         torch_gc()
         if len(related_docs_with_score) > 0:
-            prompt = generate_prompt(related_docs_with_score, query)
+            prompt = generate_prompt_v2(related_docs_with_score, query)
         else:
             prompt = query
 

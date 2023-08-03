@@ -127,9 +127,8 @@ class LoaderCheckPoint:
                 if num_gpus < 2 and self.device_map is None:
                     model = (
                         # LoaderClass.from_pretrained(checkpoint, config=self.model_config, torch_dtype=torch.bfloat16 if self.bf16 else torch.float16, trust_remote_code=True)
-                        LoaderClass.from_pretrained(checkpoint, config=self.model_config, trust_remote_code=True).quantize(8)
-                        .half()
-                        .cuda()
+                        # LoaderClass.from_pretrained(checkpoint, config=self.model_config, trust_remote_code=True).quantize(8).half().cuda()
+                        LoaderClass.from_pretrained(checkpoint, trust_remote_code=True).quantize(8).cuda()
                     )
                 # 支持自定义cuda设备
                 elif ":" in self.llm_device:
