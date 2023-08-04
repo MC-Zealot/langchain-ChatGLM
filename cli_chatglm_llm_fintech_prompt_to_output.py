@@ -15,6 +15,7 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 REPLY_WITH_SOURCE = True
 import json
 from datetime import datetime
+from utils.utils import *
 
 
 '''
@@ -37,12 +38,12 @@ def main():
     vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
     # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_v1"
     logger.error("local_doc_qa init is done")
-        # history = []
-        # ret=[]
 
+    history = []
+        # ret=[]
     index = 0
-    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts.json", "r") as f1, \
-        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example.json', 'w', encoding="utf8") as f2:
+    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts_v2.json", "r") as f1, \
+        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_20230804.json', 'w', encoding="utf8") as f2:
         lines = f1.readlines()
         for line in lines:
             questions_dict = json.loads(line)
@@ -51,13 +52,13 @@ def main():
             query = questions_content
             last_print_len = 0
             res=''
-            for resp in local_doc_qa.get_answer_by_prompt(query=query,chat_history=[],streaming=STREAMING):
+            for resp, history in local_doc_qa.get_answer_by_prompt(query=query,chat_history=history,streaming=STREAMING):
                 # print(resp["result"][last_print_len:], end="", flush=True)
                 res += resp["result"][last_print_len:]
 
                 last_print_len = len(resp["result"])
 
-            # print("res: ",res)
+            print("res: ",res)
             questions_dict['answer']=str(res)
             del questions_dict['prompt']
             ret = json.dumps(questions_dict, ensure_ascii=False)

@@ -15,6 +15,7 @@ nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 REPLY_WITH_SOURCE = True
 import json
 from datetime import datetime
+from utils.utils import *
 
 
 '''
@@ -41,17 +42,17 @@ def main():
         # ret=[]
 
     bad_case_question_ids=set()
-    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/bad_case.json", "r") as f1:
+    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_badcase_all.json", "r") as f1:
         lines = f1.readlines()
         for line in lines:
             question_id = json.loads(line)['id']
             bad_case_question_ids.add(question_id)
         f1.close()
 
-
+    history = []
     index = 0
-    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_badcase.json", "r") as f1, \
-        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_badcase2.json', 'w', encoding="utf8") as f2:
+    with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts_v3.json", "r") as f1, \
+        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_badcase_fix.json', 'w', encoding="utf8") as f2:
         lines = f1.readlines()
         for line in lines:
             questions_dict = json.loads(line)
@@ -59,11 +60,11 @@ def main():
             if questions_id not in bad_case_question_ids:
                 continue
             questions_content = questions_dict['prompt']
-
+            # query = preprocess_promot(questions_content)
             query = questions_content
             last_print_len = 0
             res=''
-            for resp in local_doc_qa.get_answer_by_prompt(query=query,chat_history=[],streaming=STREAMING):
+            for resp, history in local_doc_qa.get_answer_by_prompt(query=query,chat_history=history,streaming=STREAMING):
                 # print(resp["result"][last_print_len:], end="", flush=True)
                 res += resp["result"][last_print_len:]
 
@@ -71,7 +72,7 @@ def main():
 
             # print("res: ",res)
             questions_dict['answer']=str(res)
-            # del questions_dict['prompt']
+            del questions_dict['prompt']
             ret = json.dumps(questions_dict, ensure_ascii=False)
             f2.write(str(ret) + '\n')
             # ret.append(questions_dict)

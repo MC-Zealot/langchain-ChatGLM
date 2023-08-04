@@ -90,7 +90,7 @@ SENTENCE_SIZE = 500
 CHUNK_SIZE = 250
 
 # 传入LLM的历史记录长度
-LLM_HISTORY_LEN = 3
+LLM_HISTORY_LEN = 4
 
 # 知识库检索时返回的匹配内容条数
 VECTOR_SEARCH_TOP_K = 3

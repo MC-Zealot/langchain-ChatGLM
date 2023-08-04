@@ -61,7 +61,9 @@ def tree(filepath, ignore_dir_names=None, ignore_file_names=None):
 
 
 def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_TITLE_ENHANCE):
-
+    start_index=filepath.find('__') + 2
+    end_index=len(filepath) - 10
+    file_name=filepath[start_index:end_index]
     if filepath.lower().endswith(".md"):
         loader = UnstructuredFileLoader(filepath, mode="elements")
         docs = loader.load()
@@ -74,7 +76,7 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         documents = loader.load()
         # text_splitter = CharacterTextSplitter(separator='\n', chunk_size=sentence_size, chunk_overlap=0)
         text_splitter = TokenTextSplitter(chunk_size=sentence_size, chunk_overlap=0)
-        docs = text_splitter.split_documents(documents)
+        docs = text_splitter.split_documents_v2(documents, file_name)
 
     elif filepath.lower().endswith(".pdf"):
         # 暂且将paddle相关的loader改为动态加载，可以在不上传pdf/image知识文件的前提下使用protobuf=4.x
@@ -332,10 +334,13 @@ class LocalDocQA:
 
         for answer_result in answer_result_stream_result['answer_result_stream']:
             resp = answer_result.llm_output["answer"]
+
+            history = answer_result.history
+            history[-1][0] = query
             response = {"query": '',
                         "result": resp,
                         "source_documents": ''}
-            yield response
+            yield response, history
 
     def get_prompt_based_query(self, query, vs_path ):
         vector_store = load_vector_store(vs_path, self.embeddings)
