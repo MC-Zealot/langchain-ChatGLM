@@ -2,7 +2,7 @@ import json
 
 test_questions = open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.jsonl").readlines()
 question_2020 = []
-DATE_STR='2019'
+DATE_STR='2020'
 for test_question in test_questions:
     question = json.loads(test_question)["question"]
     if DATE_STR in question:
@@ -36,7 +36,10 @@ company_names=set()
 questions_not_hit=[]
 for question_2020_one in question_2020:
     is_hit_flag=False
+    if question_2020_one =='请问东贝电器在2019年的公司网址是什么？':
+        print(question_2020_one)
     for stock_name_one in stock_names:
+        stock_name_one=stock_name_one.replace('\n','')
         if stock_name_one in question_2020_one:
             is_hit_flag=True
             # print(question_2020_one)
