@@ -231,7 +231,7 @@ class LocalDocQA:
                 # torch_gc()
 
                 # 分批处理文本，应对大文本一次性处理导致进程终止的问题
-                batch_size = 10000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
+                batch_size = 50000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
                 batch_idx = 1
                 docs_len = len(docs)
                 logger.error("docs len: " + str(len(docs)))
@@ -245,12 +245,19 @@ class LocalDocQA:
                     if i == 0:
                         vector_store = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
                         logger.error(str(datetime.now())+"\t"+"Torch gc after docs vector store loading")
-                        torch_gc()
+                        vector_store.save_local(vs_path)
+                        # torch_gc()
                     else:
-                        vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
+                        # vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
                         # logger.error(str(datetime.now())+"\t"+f"Merging vector db, batch {batch_idx}")
-                        vector_store.merge_from(vector_store_append)  # 合并向量库
+                        # vector_store.merge_from(vector_store_append)  # 合并向量库
                         # print("Torch gc after merging vector db")
+                        logger.error(f"Loading vector db {vs_path}")
+                        append_db = load_vector_store(vs_path, self.embeddings)
+                        logger.error(f"Adding docs to vector db, batch {i + 1}")
+                        append_db.add_documents(batch_docs)
+                        append_db.save_local(vs_path)
+
                         torch_gc()
                     batch_idx += 1
 
