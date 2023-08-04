@@ -91,3 +91,37 @@ print("==================================================================")
 for q in questions_not_hit:
     print(q)
 print(len(questions_not_hit))
+
+
+def replace_company_name_and_year_by_question(question, stock_names):
+    for stock_name_one in stock_names:
+        stock_name_one=stock_name_one.replace('\n','')
+        if stock_name_one in question:
+            # print(question)
+            question = question.replace("在"+DATE_STR+"年的", "<year>")
+            question = question.replace("2020年的", "<year>")
+
+            question = question.replace("在"+DATE_STR+"年", "<year>")
+            question = question.replace(DATE_STR+"年", "<year>")
+            question = question.replace(DATE_STR, "<year>")
+            question = question.replace("在" + stock_name_one, "<company>")
+            question = question.replace("在" + stock_name_one + "的", "<company>")
+            question = question.replace(stock_name_one + "股份有限公司", "<company>")
+            question = question.replace(stock_name_one + "集团股份有限公司", "<company>")
+            question = question.replace(stock_name_one + "科技股份有限公司", "<company>")
+            question = question.replace(stock_name_one + "有限公司", "<company>")
+            question = question.replace(stock_name_one + "股份有限公司的", "<company>")
+            question = question.replace(stock_name_one + "智能控制股份有限公司", "<company>")
+            question = question.replace(stock_name_one + "的", "<company>")
+            question = question.replace(stock_name_one, "<company>")
+            question = question.replace("保留2位小数。", "<ask>")
+            question = question.replace("保留两位小数。", "<ask>")
+            question = question.replace("请保留两位小数。", "<ask>")
+            question = question.replace("请以2位小数点形式回答。", "<ask>")
+            question = question.replace("是多少元?", "<money>")
+            question = question.replace("是多少元？", "<money>")
+            question = question.replace("是多少?", "<how>")
+            question = question.replace("是多少?", "<how>")
+            question = question.replace("为多少?", "<how>")
+            question = question.replace("<company><year>", "<year><company>")
+    return question
