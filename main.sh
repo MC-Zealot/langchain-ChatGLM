@@ -1,0 +1,2 @@
+python cli_chatglm_llm_fintech_save_to_vec_store.py
+python cli_chatglm_llm_fintech_output_prompt.py

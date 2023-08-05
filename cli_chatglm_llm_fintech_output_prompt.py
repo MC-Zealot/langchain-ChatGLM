@@ -27,15 +27,15 @@ import multiprocessing
 '''
 class OutPutPrompts:
     print("========================")
-    logger.error("begins")
-    logger.error("logger config is done")
+    logger.info("begins")
+    logger.info("logger config is done")
     print("========================")
     # llm_model_ins = shared.loaderLLM()
     # llm_model_ins.history_len = LLM_HISTORY_LEN
 
-    vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"
-    logger.error("local_doc_qa init is done")
-    def init_prompts(self, vs_path = "~/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract"):
+
+    logger.info("local_doc_qa init is done")
+    def init_prompts(self, vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2"):
         local_doc_qa = LocalDocQA()
         local_doc_qa.init_cfg(llm_model=None,
                               embedding_model=EMBEDDING_MODEL,
@@ -48,7 +48,7 @@ class OutPutPrompts:
         try:
             questions_dict = json.loads(line)
             questions_content = questions_dict['question']
-            logger.error(str(datetime.now()) + "\t" + questions_content)
+            logger.info(str(datetime.now()) + "\t" + questions_content)
             query = questions_content
             prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
 
@@ -56,10 +56,10 @@ class OutPutPrompts:
             ret = json.dumps(questions_dict, ensure_ascii=False)
             return ret
         except Exception as e:
-            logger.error(e)
-            logger.error(f"{line} 未能成功加载")
+            logger.info(e)
+            logger.info(f"{line} 未能成功加载")
 
-    def multi_run(self, filepath="~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json.100"):
+    def multi_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json.100"):
         manager = multiprocessing.Manager()
         with open(filepath, "r") as f1:
             lines = f1.readlines()
@@ -79,7 +79,7 @@ class OutPutPrompts:
             f1.close()
         return output
 
-    def single_run(self, filepath="~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
+    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
         with open(filepath, "r") as f1:
             lines = f1.readlines()
             res =[]
@@ -88,7 +88,7 @@ class OutPutPrompts:
                 try:
                     questions_dict = json.loads(line)
                     questions_content = questions_dict['question']
-                    logger.error(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
+                    logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
                     query = questions_content
                     prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
 
@@ -119,11 +119,15 @@ if __name__ == "__main__":
     args_dict = vars(args)
     shared.loaderCheckPoint = LoaderCheckPoint(args_dict)
     opp = OutPutPrompts()
-    opp.init_prompts()
-    ret = opp.single_run()
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2" #向量库的路径
+    input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
+    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts2.json" #输出的prompt的路径
+
+    opp.init_prompts(vs_path)
+    ret = opp.single_run(input_filepath)
     index = 0
     # exit(0)
-    with open("~/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts.json", "w", encoding="utf8") as f2:
+    with open(output_path, "w", encoding="utf8") as f2:
         for line in ret:
             f2.write(str(line) + '\n')
             logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
