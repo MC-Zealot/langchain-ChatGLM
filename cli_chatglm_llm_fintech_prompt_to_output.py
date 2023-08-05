@@ -1,11 +1,10 @@
 # import os
 # # os.environ['NUMEXPR_MAX_THREADS'] = '12'
-
+import nltk
 from configs.model_config import *
 from chains.local_doc_qa import LocalDocQA
 import pandas as pd
 
-import nltk
 from models.loader.args import parser
 import models.shared as shared
 from models.loader import LoaderCheckPoint
@@ -43,11 +42,12 @@ def main():
         # ret=[]
     index = 0
     with open("/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_prompts_v2.json", "r") as f1, \
-        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_20230804.json', 'w', encoding="utf8") as f2:
+        open('/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/submit_example_20230804_v2.json', 'w', encoding="utf8") as f2:
         lines = f1.readlines()
         for line in lines:
             questions_dict = json.loads(line)
             questions_content = questions_dict['prompt']
+            questions_id = questions_dict['id']
 
             query = questions_content
             last_print_len = 0
@@ -57,6 +57,8 @@ def main():
                 res += resp["result"][last_print_len:]
 
                 last_print_len = len(resp["result"])
+                if last_print_len>3500:
+                    break;
 
             print("res: ",res)
             questions_dict['answer']=str(res)
@@ -64,7 +66,7 @@ def main():
             ret = json.dumps(questions_dict, ensure_ascii=False)
             f2.write(str(ret) + '\n')
             # ret.append(questions_dict)
-            logger.error(str(datetime.now()) + "\t" + f"qestion {index} is answered")
+            logger.error(str(datetime.now()) + "\t" + f"qestion {questions_id} is answered")
             f2.flush()
             index+=1
         f1.close()

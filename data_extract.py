@@ -20,14 +20,14 @@ def alter(file_old, file_new):
             if 'inside' not in questions_dict:
                 continue
 
-            questions_content = questions_dict['inside']
-            print(type(questions_content))
+            questions_content = questions_dict['inside'].replace('\n','')
+            # print(type(questions_content))
             f2.write(questions_content)
         f1.close()
         f2.close()
 
-input_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_tmp/"
-output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_tmp_extract/"
+input_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt/"
+output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract/"
 # file_path="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt"
 # file_path_new="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt.tmp"
 

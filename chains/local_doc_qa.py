@@ -36,6 +36,10 @@ HuggingFaceEmbeddings.__hash__ = _embeddings_hash
 def load_vector_store(vs_path, embeddings):
     return MyFAISS.load_local(vs_path, embeddings)
 
+@lru_cache(CACHED_VS_NUM)
+def load_vector_store_milvus(vs_path, embeddings):
+    return MyFAISS.load_local(vs_path, embeddings)
+
 
 def tree(filepath, ignore_dir_names=None, ignore_file_names=None):
     """返回两个列表，第一个列表为 filepath 下全部文件的完整路径, 第二个为对应的文件名"""
@@ -99,7 +103,7 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         docs = loader.load_and_split(text_splitter=textsplitter)
     if using_zh_title_enhance:
         docs = zh_title_enhance(docs)
-    write_check_file(filepath, docs) #不知道在干啥~~~~
+    # write_check_file(filepath, docs)
     return docs
 
 
@@ -164,7 +168,7 @@ class LocalDocQA:
                                     filepath: str or List[str],
                                     vs_path: str or os.PathLike = None,
                                     sentence_size=SENTENCE_SIZE):
-        loaded_files = []
+        # loaded_files = []
         failed_files = []
         if isinstance(filepath, str):
             if not os.path.exists(filepath):
@@ -175,7 +179,7 @@ class LocalDocQA:
                 try:
                     docs = load_file(filepath, sentence_size)
                     logger.error(f"{file} 已成功加载")
-                    loaded_files.append(filepath)
+                    # loaded_files.append(filepath)
                 except Exception as e:
                     logger.error(e)
                     logger.error(f"{file} 未能成功加载")
@@ -185,7 +189,7 @@ class LocalDocQA:
                 for fullfilepath, file in tqdm(zip(*tree(filepath, ignore_dir_names=['tmp_files'])), desc="加载文件"):
                     try:
                         docs += load_file(fullfilepath, sentence_size)
-                        loaded_files.append(fullfilepath)
+                        # loaded_files.append(fullfilepath)
                     except Exception as e:
                         logger.error(e)
                         failed_files.append(file)
@@ -231,7 +235,7 @@ class LocalDocQA:
                 # torch_gc()
 
                 # 分批处理文本，应对大文本一次性处理导致进程终止的问题
-                batch_size = 50000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
+                batch_size = 10000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
                 batch_idx = 1
                 docs_len = len(docs)
                 logger.error("docs len: " + str(len(docs)))
@@ -248,25 +252,26 @@ class LocalDocQA:
                         vector_store.save_local(vs_path)
                         # torch_gc()
                     else:
-                        # vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
-                        # logger.error(str(datetime.now())+"\t"+f"Merging vector db, batch {batch_idx}")
-                        # vector_store.merge_from(vector_store_append)  # 合并向量库
-                        # print("Torch gc after merging vector db")
-                        logger.error(f"Loading vector db {vs_path}")
-                        append_db = load_vector_store(vs_path, self.embeddings)
-                        logger.error(f"Adding docs to vector db, batch {i + 1}")
-                        append_db.add_documents(batch_docs)
-                        append_db.save_local(vs_path)
+                        vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
+                        logger.error(str(datetime.now())+"\t"+f"Merging vector db, batch {batch_idx}")
+                        vector_store.merge_from(vector_store_append)  # 合并向量库
+                        print("Torch gc after merging vector db")
+
+                        # logger.error(f"Loading vector db {vs_path}")
+                        # append_db = load_vector_store(vs_path, self.embeddings)
+                        # logger.error(f"Adding docs to vector db, batch {i + 1}")
+                        # append_db.add_documents(batch_docs)
+                        # append_db.save_local(vs_path)
 
                         torch_gc()
                     batch_idx += 1
 
             vector_store.save_local(vs_path)
-            return vs_path, loaded_files
+            return vs_path
         else:
             logger.error("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
 
-            return None, loaded_files
+            return None
 
     def one_knowledge_add(self, vs_path, one_title, one_conent, one_content_segmentation, sentence_size):
         try:
@@ -457,7 +462,7 @@ class LocalDocQA:
         manager = multiprocessing.Manager()
         task_list = manager.list(filepath)  # 共享的任务列表
         # 创建进程池
-        pool = multiprocessing.Pool(10)
+        pool = multiprocessing.Pool(8)
         # 使用进程池中的进程来执行共享的任务列表，并获取返回值
         results = pool.map_async(self.execute_task, task_list)
         # 等待所有任务执行完成

@@ -1,25 +1,33 @@
 # import os
 # # os.environ['NUMEXPR_MAX_THREADS'] = '12'
-
-from configs.model_config import *
-from chains.local_doc_qa import LocalDocQA
-
 import nltk
+from configs.model_config import *
+logger.info("logger config is done~~~~~")
+from chains.local_doc_qa import LocalDocQA
+logger.info("logger config is done~~~~~2")
+# import nltk
+logger.info("logger config is done~~~~~2.2")
 from models.loader.args import parser
+logger.info("logger config is done~~~~~2.5")
 import models.shared as shared
+logger.info("logger config is done~~~~~3")
 from models.loader import LoaderCheckPoint
 nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
-
+logger.info("logger config is done~~~~~4")
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
 from datetime import datetime
+logger.info("logger config is done~~~~~5")
+
+
+
 
 
 '''
 1.保存数据到向量库
 2.读取向量库，并且开始回答问题
 '''
-def main():
+def start():
     print("========================")
     logger.info("begins")
     logger.info("logger config is done")
@@ -34,9 +42,9 @@ def main():
     # vs_path = "~/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
     a = datetime.now()
 
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_test"
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2"
     # local_doc_qa.load_vector_store_by_vspath(vs_path)
-    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract1'
+    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract'
     file_list=[]
     for i, j, k in os.walk(filePath):
         # print(i, j, k)
@@ -128,6 +136,7 @@ def main():
     #         print("\n\n" + "\n\n".join(source_text))
 
 
+
 if __name__ == "__main__":
 #     # 通过cli.py调用cli_demo时需要在cli.py里初始化模型，否则会报错：
     # langchain-ChatGLM: error: unrecognized arguments: start cli
@@ -138,8 +147,14 @@ if __name__ == "__main__":
     # shared.loaderCheckPoint = LoaderCheckPoint(args_dict)
     # 语句从main函数里取出放到函数外部
     # 然后在cli.py里初始化
+
+
+
+    logger.info("begins1")
     args = None
     args = parser.parse_args()
     args_dict = vars(args)
+    logger.info("begins2")
     shared.loaderCheckPoint = LoaderCheckPoint(args_dict)
-    main()
+    logger.info("begins3")
+    start()

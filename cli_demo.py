@@ -1,12 +1,12 @@
+import nltk
+nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 from configs.model_config import *
 from chains.local_doc_qa import LocalDocQA
 import os
-import nltk
+
 from models.loader.args import parser
 import models.shared as shared
 from models.loader import LoaderCheckPoint
-nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
-
 # Show reply with source text from input document
 REPLY_WITH_SOURCE = True
 
