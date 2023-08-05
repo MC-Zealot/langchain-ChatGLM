@@ -43,6 +43,7 @@ class OutPutPrompts:
                               top_k=VECTOR_SEARCH_TOP_K)
         self.vs_path = vs_path
         self.local_doc_qa = local_doc_qa
+        self.stock_names = self.get_all_company_names()
 
     def execute_task(self, line):
         try:
@@ -79,6 +80,35 @@ class OutPutPrompts:
             f1.close()
         return output
 
+    def get_year(self, query):
+        which_year = "-1"
+        if "2019" in query:
+            which_year = "2019"
+        elif "2020" in query:
+            which_year = "2020"
+        elif "2021" in query:
+            which_year = "2021"
+        return which_year
+
+
+    def get_all_company_names(self):
+        stock_names = []
+        with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/7.txt", "r") as f:
+            lines = f.readlines()
+            for stock_mapping_one in lines:
+                stock_name = stock_mapping_one.split("\t")[1]
+                stock_names.append(stock_name)
+            f.close()
+        return stock_names
+
+    def get_company(self, query):
+        which_company = "-1"
+        for stock_name in self.stock_names:
+            if stock_name in query:
+                which_company = stock_name
+        return which_company
+
+
     def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
         with open(filepath, "r") as f1:
             lines = f1.readlines()
@@ -90,11 +120,16 @@ class OutPutPrompts:
                     questions_content = questions_dict['question']
                     logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
                     query = questions_content
-                    prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
+                    year = self.get_year(query)
+                    company_name = self.get_company(query)
+                    logger.info(year+"\t"+company_name)
 
-                    questions_dict['prompt'] = str(prompt)
-                    tmp = json.dumps(questions_dict, ensure_ascii=False)
-                    res.append(tmp)
+
+                    # prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
+                    #
+                    # questions_dict['prompt'] = str(prompt)
+                    # tmp = json.dumps(questions_dict, ensure_ascii=False)
+                    # res.append(tmp)
                     index+=1
                 except Exception as e:
                     logger.error(e)
