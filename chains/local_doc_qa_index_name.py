@@ -1,7 +1,7 @@
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from vectorstores import MyFAISS
 from langchain.document_loaders import UnstructuredFileLoader, TextLoader, CSVLoader, DirectoryLoader
-from configs.model_config import *
+
 from datetime import datetime
 from textsplitter import ChineseTextSplitter, AliTextSplitter
 from langchain.text_splitter import TokenTextSplitter
@@ -20,6 +20,7 @@ from functools import lru_cache
 from textsplitter.zh_title_enhance import zh_title_enhance
 from langchain.chains.base import Chain
 import multiprocessing
+from configs.model_config import *
 
 
 
@@ -80,7 +81,8 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         documents = loader.load()
         # text_splitter = CharacterTextSplitter(separator='\n', chunk_size=sentence_size, chunk_overlap=0)
         text_splitter = TokenTextSplitter(chunk_size=sentence_size, chunk_overlap=0)
-        docs = text_splitter.split_documents_v2(documents, file_name)
+        docs = text_splitter.split_documents(documents)
+        # docs = text_splitter.split_documents_v2(documents, file_name)
 
     elif filepath.lower().endswith(".pdf"):
         # 暂且将paddle相关的loader改为动态加载，可以在不上传pdf/image知识文件的前提下使用protobuf=4.x
@@ -163,6 +165,15 @@ class LocalDocQA:
         self.llm_model_chain = llm_model
         self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[embedding_model], model_kwargs={'device': embedding_device})
         self.top_k = top_k
+        self.company_names = self.init_company_names()
+
+    def init_company_names(self):
+        ret_names=[]
+        company_file="/home/zealot/yizhou/git/langchain-ChatGLM/all_company_short.txt"
+        with open(company_file, "r", encoding="utf-8") as f1:
+            for line in f1:
+                ret_names.append(line.replace('\n',''))
+        return ret_names
 
     def init_knowledge_vector_store(self, filepath: str or List[str], vs_path: str or os.PathLike = None, sentence_size=SENTENCE_SIZE):
         failed_files = []
@@ -215,9 +226,15 @@ class LocalDocQA:
                                        "vector_store")
 
             # 分批处理文本，应对大文本一次性处理导致进程终止的问题
-            logger.error("docs len: " + str(len(docs)))
-
-            index_name=file.split("__")[1] + file.split("__")[4]
+            # logger.error("docs len: " + str(len(docs)))
+            file_company_name=file.split("__")[1]
+            for name in self.company_names:
+                full_name = name.split('\t')[0]
+                short_name = name.split('\t')[1]
+                if full_name in file_company_name or short_name in file_company_name:
+                    file_company_name = short_name
+                    break
+            index_name=file_company_name + file.split("__")[4]
             vector_store = MyFAISS.from_documents(docs, self.embeddings)
             vector_store.save_local(vs_path, index_name)
 
@@ -406,7 +423,6 @@ class LocalDocQA:
             # logger.error(f"{file} 已成功加载1233")
             if len(docs) > 0:
                 logger.error(str(datetime.now()) + "\t" + "文件加载完毕，正在生成向量库")
-                print("文件加载完毕，正在生成向量库")
 
                 self.save_vector_store(vs_path, file, docs)
                 # vector_store.save_local(vs_path)

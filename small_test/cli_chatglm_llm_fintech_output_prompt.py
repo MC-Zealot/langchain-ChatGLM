@@ -5,7 +5,7 @@ import nltk
 from configs.model_config import *
 
 nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
-from chains.local_doc_qa import LocalDocQA
+from chains.local_doc_qa_index_name import LocalDocQA
 import pandas as pd
 
 
@@ -83,17 +83,17 @@ class OutPutPrompts:
     def get_year(self, query):
         which_year = "-1"
         if "2019" in query:
-            which_year = "2019"
+            which_year = "2019年"
         elif "2020" in query:
-            which_year = "2020"
+            which_year = "2020年"
         elif "2021" in query:
-            which_year = "2021"
+            which_year = "2021年"
         return which_year
 
 
     def get_all_company_names(self):
         stock_names = []
-        with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/7.txt", "r") as f:
+        with open("/home/zealot/yizhou/git/langchain-ChatGLM/all_company_short.txt", "r") as f:
             lines = f.readlines()
             for stock_mapping_one in lines:
                 stock_name = stock_mapping_one.split("\t")[1]
@@ -104,8 +104,10 @@ class OutPutPrompts:
     def get_company(self, query):
         which_company = "-1"
         for stock_name in self.stock_names:
-            if stock_name in query:
-                which_company = stock_name
+            full_name=stock_name.split('\t')[0]
+            short_name=stock_name.split('\t')[1]
+            if full_name in query or short_name in query:
+                which_company = short_name
         return which_company
 
 
@@ -123,7 +125,7 @@ class OutPutPrompts:
                     year = self.get_year(query)
                     company_name = self.get_company(query)
                     logger.info(year+"\t"+company_name)
-
+                    index_name = company_name+year
 
                     prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
                     #

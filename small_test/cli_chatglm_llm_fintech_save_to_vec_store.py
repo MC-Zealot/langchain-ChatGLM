@@ -35,9 +35,9 @@ def start():
     # vs_path = "~/yizhou/git/ChatGLM2-6B_new/langchain/keda_FAISS_20230731_000944/vector_store"
     a = datetime.now()
 
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp"
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name"
     # local_doc_qa.load_vector_store_by_vspath(vs_path)
-    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract1'
+    filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract_filtered_3000'
     file_list=[]
     for i, j, k in os.walk(filePath):
         # print(i, j, k)
