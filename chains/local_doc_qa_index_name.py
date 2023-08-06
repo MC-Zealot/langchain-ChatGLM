@@ -38,6 +38,10 @@ def load_vector_store(vs_path, embeddings):
     return MyFAISS.load_local(vs_path, embeddings)
 
 @lru_cache(CACHED_VS_NUM)
+def load_vector_store_by_index_name(vs_path, embeddings, index_name):
+    return MyFAISS.load_local(vs_path, embeddings, index_name)
+
+@lru_cache(CACHED_VS_NUM)
 def load_vector_store_milvus(vs_path, embeddings):
     return MyFAISS.load_local(vs_path, embeddings)
 
@@ -321,8 +325,8 @@ class LocalDocQA:
                         "source_documents": ''}
             yield response, history
 
-    def get_prompt_based_query(self, query, vs_path ):
-        vector_store = load_vector_store(vs_path, self.embeddings)
+    def get_prompt_based_query(self, query, vs_path, index_name):
+        vector_store = load_vector_store_by_index_name(vs_path, self.embeddings, index_name)
         vector_store.chunk_size = self.chunk_size
         vector_store.chunk_conent = self.chunk_conent
         vector_store.score_threshold = self.score_threshold
@@ -417,6 +421,20 @@ class LocalDocQA:
 
     def execute_task(self, file, vs_path):
         # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp"
+
+
+        file_company_name = file.split("__")[1]
+        for name in self.company_names:
+            full_name = name.split('\t')[0]
+            short_name = name.split('\t')[1]
+            if full_name in file_company_name or short_name in file_company_name:
+                file_company_name = short_name
+                break
+        index_name = file_company_name + file.split("__")[4]
+        filepath=vs_path+'/'+index_name+'.faiss'
+        if os.path.isfile(filepath):
+            logger.error("faiss库以存在！"+str(filepath))
+            return
         try:
             docs = load_file(file)
             # print(f"{file} 已成功加载123....")

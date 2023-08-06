@@ -19,6 +19,7 @@ REPLY_WITH_SOURCE = True
 import json
 from datetime import datetime
 import multiprocessing
+from utils.utils import *
 
 
 '''
@@ -43,7 +44,8 @@ class OutPutPrompts:
                               top_k=VECTOR_SEARCH_TOP_K)
         self.vs_path = vs_path
         self.local_doc_qa = local_doc_qa
-        self.stock_names = self.get_all_company_names()
+        # self.stock_names = self.get_all_company_names()
+        self.stock_names = local_doc_qa.company_names
 
     def execute_task(self, line):
         try:
@@ -108,6 +110,7 @@ class OutPutPrompts:
             short_name=stock_name.split('\t')[1]
             if full_name in query or short_name in query:
                 which_company = short_name
+                break
         return which_company
 
 
@@ -120,15 +123,18 @@ class OutPutPrompts:
                 try:
                     questions_dict = json.loads(line)
                     questions_content = questions_dict['question']
+                    questions_id = questions_dict['id']
                     logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
                     query = questions_content
                     year = self.get_year(query)
                     company_name = self.get_company(query)
+                    if company_name=='-1':
+                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}")
                     logger.info(year+"\t"+company_name)
                     index_name = company_name+year
-
-                    prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
-                    #
+                    filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
+                    prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
+                    print(prompt)
                     # questions_dict['prompt'] = str(prompt)
                     # tmp = json.dumps(questions_dict, ensure_ascii=False)
                     # res.append(tmp)
