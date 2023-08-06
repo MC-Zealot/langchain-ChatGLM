@@ -27,7 +27,7 @@ def alter(file_old, file_new):
         f2.close()
 
 input_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt/"
-output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract/"
+output_path="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt_extract_not_filtered/"
 # file_path="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt"
 # file_path_new="2020-04-10__福建福日电子股份有限公司__600203__福日电子__2019年__年度报告.txt.tmp"
 
@@ -38,7 +38,7 @@ file_list=[]
 for i, j, k in os.walk(filePath):
     # print(i, j, k)
     index = 0
-    while index < len(k):
+    while index < 50:
         file_path=str(i)+"/"+k[index]
         print(str(index)+"\t"+file_path)
         file_name=k[index]
