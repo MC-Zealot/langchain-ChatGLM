@@ -125,7 +125,7 @@ class OutPutPrompts:
                     logger.info(year+"\t"+company_name)
 
 
-                    # prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
+                    prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=self.vs_path)
                     #
                     # questions_dict['prompt'] = str(prompt)
                     # tmp = json.dumps(questions_dict, ensure_ascii=False)
