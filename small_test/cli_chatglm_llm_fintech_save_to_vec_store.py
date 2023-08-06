@@ -2,7 +2,7 @@
 # # os.environ['NUMEXPR_MAX_THREADS'] = '12'
 import nltk
 from configs.model_config import *
-from chains.local_doc_qa import LocalDocQA
+from chains.local_doc_qa_index_name import LocalDocQA
 # import nltk
 from models.loader.args import parser
 import models.shared as shared

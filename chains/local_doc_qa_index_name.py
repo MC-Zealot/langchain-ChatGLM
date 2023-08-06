@@ -198,71 +198,10 @@ class LocalDocQA:
 
         else:
             docs = []
-            docss = self.multi_run(filepath)
-            for tmp_docs in docss:
-                docs.extend(tmp_docs)
+            # self.multi_run(filepath, vs_path)
+            for file_path in filepath:
+                self.execute_task(file_path, vs_path)
 
-        if len(docs) > 0:
-            logger.error(str(datetime.now())+"\t"+"文件加载完毕，正在生成向量库")
-            print("文件加载完毕，正在生成向量库")
-
-            vector_store = self.save_vector_store(vs_path, file, docs)
-            vector_store.save_local(vs_path)
-            return vs_path
-        else:
-            logger.error("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
-
-            return None
-
-    def init_knowledge_vector_store(self, filepath: str or List[str], vs_path: str or os.PathLike = None, sentence_size=SENTENCE_SIZE):
-        failed_files = []
-        file=''
-        if isinstance(filepath, str):
-            if not os.path.exists(filepath):
-                print("路径不存在")
-                return None
-            elif os.path.isfile(filepath):
-                file = os.path.split(filepath)[-1]
-                try:
-                    docs = load_file(filepath, sentence_size)
-                    logger.error(f"{file} 已成功加载")
-                    # loaded_files.append(filepath)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(f"{file} 未能成功加载")
-                    return None
-            elif os.path.isdir(filepath):
-                docs = []
-                for fullfilepath, file in tqdm(zip(*tree(filepath, ignore_dir_names=['tmp_files'])), desc="加载文件"):
-                    try:
-                        docs += load_file(fullfilepath, sentence_size)
-                        # loaded_files.append(fullfilepath)
-                    except Exception as e:
-                        logger.error(e)
-                        failed_files.append(file)
-
-                if len(failed_files) > 0:
-                    logger.error("以下文件未能成功加载：")
-                    for file in failed_files:
-                        logger.error(f"{file}\n")
-
-        else:
-            docs = []
-            docss = self.multi_run(filepath)
-            for tmp_docs in docss:
-                docs.extend(tmp_docs)
-
-        if len(docs) > 0:
-            logger.error(str(datetime.now())+"\t"+"文件加载完毕，正在生成向量库")
-            print("文件加载完毕，正在生成向量库")
-
-            vector_store = self.save_vector_store(vs_path, file, docs)
-            vector_store.save_local(vs_path)
-            return vs_path
-        else:
-            logger.error("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
-
-            return None
 
     def save_vector_store(self, vs_path, file, docs):
         if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
@@ -276,30 +215,12 @@ class LocalDocQA:
                                        "vector_store")
 
             # 分批处理文本，应对大文本一次性处理导致进程终止的问题
-            batch_size = 10000  # 按照10000个tokens一批进行处理，可以根据自己的服务器内存配置进行调整
-            batch_idx = 1
-            docs_len = len(docs)
             logger.error("docs len: " + str(len(docs)))
-            for i in range(0, docs_len, batch_size):
-                if i + batch_size >= docs_len:
-                    next_i = docs_len - 1
-                else:
-                    next_i = i + batch_size
-                batch_docs = docs[i: next_i]
-                logger.error(str(datetime.now()) + "\t" + f"Building vector db from {batch_idx} batch docs and {i} doc")
-                if i == 0:
-                    vector_store = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
-                    logger.error(str(datetime.now()) + "\t" + "Torch gc after docs vector store loading")
-                    vector_store.save_local(vs_path)
-                    # torch_gc()
-                else:
-                    vector_store_append = MyFAISS.from_documents(batch_docs, self.embeddings)  # docs 为Document列表
-                    logger.error(str(datetime.now()) + "\t" + f"Merging vector db, batch {batch_idx}")
-                    vector_store.merge_from(vector_store_append)  # 合并向量库
-                    print("Torch gc after merging vector db")
 
-                    torch_gc()
-                batch_idx += 1
+            index_name=file.split("__")[1] + file.split("__")[4]
+            vector_store = MyFAISS.from_documents(docs, self.embeddings)
+            vector_store.save_local(vs_path, index_name)
+
         return vector_store
 
     def one_knowledge_add(self, vs_path, one_title, one_conent, one_content_segmentation, sentence_size):
@@ -477,32 +398,39 @@ class LocalDocQA:
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
         torch_gc()
 
-    def execute_task(self, file):
+    def execute_task(self, file, vs_path):
+        # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp"
         try:
-            doc = load_file(file)
+            docs = load_file(file)
             # print(f"{file} 已成功加载123....")
             # logger.error(f"{file} 已成功加载1233")
-            return doc
+            if len(docs) > 0:
+                logger.error(str(datetime.now()) + "\t" + "文件加载完毕，正在生成向量库")
+                print("文件加载完毕，正在生成向量库")
+
+                self.save_vector_store(vs_path, file, docs)
+                # vector_store.save_local(vs_path)
+            return True
         except Exception as e:
             logger.error(e)
             logger.error(f"{file} 未能成功加载")
 
-    def multi_run(self, filepath):
+    def multi_run(self, filepath, vs_path):
         manager = multiprocessing.Manager()
         task_list = manager.list(filepath)  # 共享的任务列表
         # 创建进程池
-        pool = multiprocessing.Pool(8)
+        pool = multiprocessing.Pool(1)
         # 使用进程池中的进程来执行共享的任务列表，并获取返回值
-        results = pool.map_async(self.execute_task, task_list)
+        pool.map_async(self.execute_task, task_list)
         # 等待所有任务执行完成
-        results.wait()
+        # results.wait()
         # 获取每个任务的返回值
-        output = results.get()
+        # output = results.get()
         # print(output) # 打印输出结果
         # 关闭进程池
         pool.close()
         pool.join()
-        return output
+        # return output
 
 
 if __name__ == "__main__":
