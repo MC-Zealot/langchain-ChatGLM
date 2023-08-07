@@ -10,25 +10,26 @@ with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/6.txt", "r") a
 
 
 def replace_company_name_and_year_by_question(question, stock_names):
+    question = question.replace("在2020年的", "")
+    question = question.replace("在2021年的", "")
+    question = question.replace("在2019年的", "")
+    question = question.replace("2019年的", "")
+    question = question.replace("2020年的", "")
+    question = question.replace("2021年的", "")
+    question = question.replace("在2020年", "")
+    question = question.replace("在2021年", "")
+    question = question.replace("在2019年", "")
+    question = question.replace("2019年", "")
+    question = question.replace("2020年", "")
+    question = question.replace("2021年", "")
+    question = question.replace("2019", "")
+    question = question.replace("2020", "")
+    question = question.replace("2021", "")
     for stock_name_one in stock_names:
         stock_name_one=stock_name_one.replace('\n','')
         full_name=stock_name_one.split('\t')[0]
         short_name=stock_name_one.split('\t')[1]
-        question = question.replace("在2020年的", "")
-        question = question.replace("在2021年的", "")
-        question = question.replace("在2019年的", "")
-        question = question.replace("2019年的", "")
-        question = question.replace("2020年的", "")
-        question = question.replace("2021年的", "")
-        question = question.replace("在2020年", "")
-        question = question.replace("在2021年", "")
-        question = question.replace("在2019年", "")
-        question = question.replace("2019年", "")
-        question = question.replace("2020年", "")
-        question = question.replace("2021年", "")
-        question = question.replace("2019", "")
-        question = question.replace("2020", "")
-        question = question.replace("2021", "")
+
         if full_name in question:
             # print(question)
             question = question.replace("在" + full_name, "")
@@ -52,8 +53,8 @@ def replace_company_name_and_year_by_question(question, stock_names):
             question = question.replace(short_name + "智能控制股份有限公司", "")
             question = question.replace(short_name + "的", "")
             question = question.replace(short_name, "")
-        else:
-            print("没有公司名称")
+        # else:
+        #     print("没有公司名称")
 
 
     return question

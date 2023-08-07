@@ -115,7 +115,7 @@ class OutPutPrompts:
 
 
     def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
-        with open(filepath, "r") as f1:
+        with open(filepath, "r") as f1, open(output_path, "w", encoding="utf8") as f2:
             lines = f1.readlines()
             res =[]
             index = 0
@@ -124,20 +124,25 @@ class OutPutPrompts:
                     questions_dict = json.loads(line)
                     questions_content = questions_dict['question']
                     questions_id = questions_dict['id']
-                    logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
-                    query = questions_content
+                    # logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
+                    query = questions_content.replace('(','').replace(')','')
                     year = self.get_year(query)
                     company_name = self.get_company(query)
-                    if company_name=='-1':
-                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}")
-                    logger.info(year+"\t"+company_name)
-                    index_name = company_name+year
-                    filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
-                    prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
-                    print(prompt)
-                    # questions_dict['prompt'] = str(prompt)
-                    # tmp = json.dumps(questions_dict, ensure_ascii=False)
-                    # res.append(tmp)
+                    if company_name != '-1' and year != '-1':
+                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}"+str(questions_id)+"\t"+str(query))
+                        # logger.info(year+"\t"+company_name)
+                        index_name = company_name+year
+                        filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
+                        prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
+                    else:
+                        prompt=query
+                    # print(prompt)
+                    # res.append(prompt)
+                    questions_dict['prompt'] = str(prompt)
+                    tmp = json.dumps(questions_dict, ensure_ascii=False)
+                    f2.write(str(tmp) + '\n')
+                    # f2.write(str(prompt.replace('\n','')) + '\n')
+                    logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
                     index+=1
                 except Exception as e:
                     logger.error(e)
@@ -162,20 +167,22 @@ if __name__ == "__main__":
     args_dict = vars(args)
     shared.loaderCheckPoint = LoaderCheckPoint(args_dict)
     opp = OutPutPrompts()
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp" #向量库的路径
-    input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
+    # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp" #向量库的路径
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name" #向量库的路径
+    # input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
+    input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
     output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts2.json" #输出的prompt的路径
 
     opp.init_prompts(vs_path)
     ret = opp.single_run(input_filepath)
     logger.info("ret: "+"\n".join(ret))
     index = 0
-    exit(0)
-    with open(output_path, "w", encoding="utf8") as f2:
-        for line in ret:
-            f2.write(str(line) + '\n')
-            logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
-
-            index+=1
-        f2.flush()
-        f2.close()
+    # exit(0)
+    # with open(output_path, "w", encoding="utf8") as f2:
+    #     for line in ret:
+    #         f2.write(str(line) + '\n')
+    #         logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
+    #
+    #         index+=1
+    #     f2.flush()
+    #     f2.close()
