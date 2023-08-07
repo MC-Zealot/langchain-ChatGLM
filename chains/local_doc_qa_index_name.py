@@ -221,10 +221,13 @@ class LocalDocQA:
         else:
             docs = []
             # self.multi_run(filepath, vs_path)
+            index = 0
             for file_path in filepath:
                 if "太保" in file_path:
                     print(file_path)
+                logger.info(str(datetime.now()) + "\t" + "文件正在生成向量库\t" +str(index)+"\t"+ str(file_path))
                 self.execute_task(file_path, vs_path)
+                index+=1
 
 
     def save_vector_store(self, vs_path, file, docs):
@@ -450,7 +453,7 @@ class LocalDocQA:
             # print(f"{file} 已成功加载123....")
             # logger.error(f"{file} 已成功加载1233")
             if len(docs) > 0:
-                logger.error(str(datetime.now()) + "\t" + "文件加载完毕，正在生成向量库")
+                # logger.error(str(datetime.now()) + "\t" + "文件加载完毕，正在生成向量库")
 
                 self.save_vector_store(vs_path, file, docs)
                 # vector_store.save_local(vs_path)
