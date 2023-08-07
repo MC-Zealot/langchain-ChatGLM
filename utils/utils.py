@@ -66,7 +66,7 @@ def preprocess_promot(prompt):
     query_new = replace_company_name_and_year_by_question(query, stock_names)
     return prompt[0: start_index] + query_new
 
-def all_companys_output():
+def all_companys_output(output_path):
     filePath = '/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/alltxt'
     company_names = []
     for i, j, k in os.walk(filePath):
@@ -82,7 +82,9 @@ def all_companys_output():
     print(len(company_names))
     print(company_names[0:10])
     company_names = set(company_names)
-
+    with open(output_path, "w", encoding="utf8") as f2:
+        for name in company_names:
+            f2.write(str(name) + '\n')
 
 
 def testcase_replace_company_name_and_year_by_question():
@@ -95,4 +97,4 @@ def testcase_replace_company_name_and_year_by_question():
     print(prompt_new)
 
 if __name__ == "__main__":
-    all_companys_output()
+    all_companys_output("/all_company_short.txt")

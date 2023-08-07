@@ -215,6 +215,8 @@ class LocalDocQA:
             docs = []
             # self.multi_run(filepath, vs_path)
             for file_path in filepath:
+                if "太保" in file_path:
+                    print(file_path)
                 self.execute_task(file_path, vs_path)
 
 
@@ -326,6 +328,7 @@ class LocalDocQA:
             yield response, history
 
     def get_prompt_based_query(self, query, vs_path, index_name):
+
         vector_store = load_vector_store_by_index_name(vs_path, self.embeddings, index_name)
         vector_store.chunk_size = self.chunk_size
         vector_store.chunk_conent = self.chunk_conent

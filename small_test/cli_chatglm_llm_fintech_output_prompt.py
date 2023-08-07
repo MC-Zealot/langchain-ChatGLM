@@ -2,9 +2,8 @@
 # # os.environ['NUMEXPR_MAX_THREADS'] = '12'
 
 import nltk
-from configs.model_config import *
 
-nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
+
 from chains.local_doc_qa_index_name import LocalDocQA
 import pandas as pd
 
@@ -20,7 +19,8 @@ import json
 from datetime import datetime
 import multiprocessing
 from utils.utils import *
-
+from configs.model_config import *
+nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
 
 '''
 1.保存数据到向量库
@@ -128,13 +128,23 @@ class OutPutPrompts:
                     query = questions_content.replace('(','').replace(')','')
                     year = self.get_year(query)
                     company_name = self.get_company(query)
+
                     if company_name != '-1' and year != '-1':
-                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}"+str(questions_id)+"\t"+str(query))
                         # logger.info(year+"\t"+company_name)
                         index_name = company_name+year
+                        # 判断vs_path对应的index_name是否存在，如果不存在，则换一个，
+                        # 换哪个呢？换一个+1年的
+                        year_int = int(year[0:4])
+                        if not os.path.isfile(vs_path + "/"+index_name+".faiss"):
+                            new_year = year_int + 1
+                            index_name = company_name + str(new_year) +"年"
+                            if not os.path.isfile(vs_path + "/" + index_name + ".faiss"):
+                                new_year = year_int + 2
+                                index_name = company_name + str(new_year) + "年"
                         filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
                         prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
                     else:
+                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
                         prompt=query
                     # print(prompt)
                     # res.append(prompt)
@@ -142,7 +152,8 @@ class OutPutPrompts:
                     tmp = json.dumps(questions_dict, ensure_ascii=False)
                     f2.write(str(tmp) + '\n')
                     # f2.write(str(prompt.replace('\n','')) + '\n')
-                    logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
+                    if index % 500 == 0:
+                        logger.error(str(datetime.now()) + "\t" + f"qestion {index} is prompted")
                     index+=1
                 except Exception as e:
                     logger.error(e)
