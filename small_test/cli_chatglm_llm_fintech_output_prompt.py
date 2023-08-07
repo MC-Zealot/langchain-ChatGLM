@@ -114,8 +114,8 @@ class OutPutPrompts:
         return which_company
 
 
-    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json", type='specific'):
-        with open(filepath, "r") as f1, open(output_path, "w", encoding="utf8") as f2:
+    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json", type='specific', openmode='w'):
+        with open(filepath, "r") as f1, open(output_path, openmode, encoding="utf8") as f2:
             lines = f1.readlines()
             index = 0
             for line in lines:
@@ -127,7 +127,7 @@ class OutPutPrompts:
                     query = questions_content.replace('(','').replace(')','')
                     year = self.get_year(query)
                     company_name = self.get_company(query)
-
+                    prompt=''
                     if company_name != '-1' and year != '-1':
                         # logger.info(year+"\t"+company_name)
                         index_name = company_name+year
@@ -155,6 +155,8 @@ class OutPutPrompts:
                             logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
                             prompt=query
                     # print(prompt)
+                    if len(prompt) == 0:
+                        continue
                     questions_dict['prompt'] = str(prompt.replace('\n','。'))
                     tmp = json.dumps(questions_dict, ensure_ascii=False)
                     f2.write(str(tmp) + '\n')
@@ -188,12 +190,12 @@ if __name__ == "__main__":
     vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name" #向量库的路径
     # input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
     input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
-    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts2.json" #输出的prompt的路径
+    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts3.json" #输出的prompt的路径
 
     opp.init_prompts(vs_path)
-    opp.single_run(filepath=input_filepath, type='specific')
-    opp.single_run(filepath=input_filepath, type='generic')
-    logger.info("output prompt doen: ")
+    opp.single_run(filepath=input_filepath, type='specific',openmode='w')
+    opp.single_run(filepath=input_filepath, type='generic',openmode='a')
+    logger.info("output prompt done: ")
     # exit(0)
     # with open(output_path, "w", encoding="utf8") as f2:
     #     for line in ret:
