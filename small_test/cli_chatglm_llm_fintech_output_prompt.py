@@ -135,15 +135,23 @@ class OutPutPrompts:
                         # 判断vs_path对应的index_name是否存在，如果不存在，则换一个，
                         # 换哪个呢？换一个+1年的
                         year_int = int(year[0:4])
-                        if not os.path.isfile(vs_path + "/"+index_name+".faiss"):
+                        if not os.path.isfile(self.vs_path + "/"+index_name+".faiss"):
                             new_year = year_int + 1
                             index_name = company_name + str(new_year) +"年"
-                            if not os.path.isfile(vs_path + "/" + index_name + ".faiss"):
+                            if new_year <=2021 and not os.path.isfile(self.vs_path + "/" + index_name + ".faiss"):
                                 new_year = year_int + 2
                                 index_name = company_name + str(new_year) + "年"
-                        filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
-                        prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
+                        if not os.path.isfile(self.vs_path + "/" + index_name + ".faiss"):
+                            continue  # 暂时的，测试一下只找大数据库的速度
+                            vs_path_new='/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2'
+                            index_name='index'
+                            prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=vs_path_new, index_name=index_name)
+                        else:
+                            # continue #暂时的，测试一下只找大数据库的速度
+                            filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
+                            prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
                     else:
+
                         logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
                         prompt=query
                     # print(prompt)
