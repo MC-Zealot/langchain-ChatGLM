@@ -21,7 +21,7 @@ from textsplitter.zh_title_enhance import zh_title_enhance
 from langchain.chains.base import Chain
 import multiprocessing
 from configs.model_config import *
-
+import copy
 
 
 # patch HuggingFaceEmbeddings to make it hashable
@@ -77,15 +77,22 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
         loader = UnstructuredFileLoader(filepath, mode="elements")
         docs = loader.load()
     elif filepath.lower().endswith(".txt"):
+        loader = TextLoader(filepath)
+        documents = loader.load()
+        texts = documents[0].page_content.split("。")
+        docs = []
+        for chunk in texts:
+            new_doc = Document(page_content=chunk, metadata=copy.deepcopy(documents[0].metadata))
+            docs.append(new_doc)
         # loader = TextLoader(filepath, autodetect_encoding=True)
         # textsplitter = ChineseTextSplitter(pdf=False, sentence_size=sentence_size)
         # docs = loader.load_and_split(textsplitter)
-        loader = TextLoader(filepath)
         # 将数据转成 document 对象，每个文件会作为一个 document
-        documents = loader.load()
         # text_splitter = CharacterTextSplitter(separator='\n', chunk_size=sentence_size, chunk_overlap=0)
-        text_splitter = TokenTextSplitter(chunk_size=sentence_size, chunk_overlap=0)
-        docs = text_splitter.split_documents(documents)
+        # text_splitter = TokenTextSplitter(chunk_size=sentence_size, chunk_overlap=0)
+
+        # docs = text_splitter.create_documents(texts, metadatas=metadatas)
+        # docs = text_splitter.split_documents(documents)
         # docs = text_splitter.split_documents_v2(documents, file_name)
 
     elif filepath.lower().endswith(".pdf"):

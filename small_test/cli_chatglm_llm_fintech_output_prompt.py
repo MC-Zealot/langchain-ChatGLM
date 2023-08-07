@@ -124,7 +124,7 @@ class OutPutPrompts:
                     questions_content = questions_dict['question']
                     questions_id = questions_dict['id']
                     # logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
-                    query = questions_content.replace('(','').replace(')','')
+                    query = questions_content.replace('(','').replace(')','').replace("保留2位小数。", "").replace("保留两位小数。", "").replace("请保留两位小数。", "").replace("请以2位小数点形式回答。", "").replace("是多少元?", "").replace("是多少元？", "").replace("是多少?", "").replace("是多少?", "").replace("为多少?", "")
                     year = self.get_year(query)
                     company_name = self.get_company(query)
                     prompt=''
@@ -186,11 +186,12 @@ if __name__ == "__main__":
     args_dict = vars(args)
     shared.loaderCheckPoint = LoaderCheckPoint(args_dict)
     opp = OutPutPrompts()
-    # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp" #向量库的路径
-    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name" #向量库的路径
-    # input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
-    input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
-    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts3.json" #输出的prompt的路径
+    vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract_tmp" #向量库的路径
+    # vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name" #向量库的路径
+    input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
+    # input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
+    # output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts3.json" #输出的prompt的路径
+    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts_tmp.json" #输出的prompt的路径
 
     opp.init_prompts(vs_path)
     opp.single_run(filepath=input_filepath, type='specific',openmode='w')
