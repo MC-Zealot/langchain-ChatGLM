@@ -114,10 +114,9 @@ class OutPutPrompts:
         return which_company
 
 
-    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json"):
+    def single_run(self, filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json", type='specific'):
         with open(filepath, "r") as f1, open(output_path, "w", encoding="utf8") as f2:
             lines = f1.readlines()
-            res =[]
             index = 0
             for line in lines:
                 try:
@@ -142,21 +141,21 @@ class OutPutPrompts:
                                 new_year = year_int + 2
                                 index_name = company_name + str(new_year) + "年"
                         if not os.path.isfile(self.vs_path + "/" + index_name + ".faiss"):
-                            continue  # 暂时的，测试一下只找大数据库的速度
-                            vs_path_new='/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2'
-                            index_name='index'
-                            prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=vs_path_new, index_name=index_name)
+                            if type =='generic':
+                                vs_path_new='/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2'
+                                index_name='index'
+                                prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=vs_path_new, index_name=index_name)
                         else:
-                            # continue #暂时的，测试一下只找大数据库的速度
-                            filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
-                            prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
+                            if type =='specific':
+                                # continue #暂时的，测试一下只找大数据库的速度
+                                filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
+                                prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
                     else:
-
-                        logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
-                        prompt=query
+                        if type == 'generic':
+                            logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
+                            prompt=query
                     # print(prompt)
-                    # res.append(prompt)
-                    questions_dict['prompt'] = str(prompt)
+                    questions_dict['prompt'] = str(prompt.replace('\n','。'))
                     tmp = json.dumps(questions_dict, ensure_ascii=False)
                     f2.write(str(tmp) + '\n')
                     # f2.write(str(prompt.replace('\n','')) + '\n')
@@ -166,7 +165,6 @@ class OutPutPrompts:
                 except Exception as e:
                     logger.error(e)
                     logger.error(f"{line} 未能成功加载")
-        return res
 
 
 
@@ -193,9 +191,9 @@ if __name__ == "__main__":
     output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts2.json" #输出的prompt的路径
 
     opp.init_prompts(vs_path)
-    ret = opp.single_run(input_filepath)
-    logger.info("ret: "+"\n".join(ret))
-    index = 0
+    opp.single_run(filepath=input_filepath, type='specific')
+    opp.single_run(filepath=input_filepath, type='generic')
+    logger.info("output prompt doen: ")
     # exit(0)
     # with open(output_path, "w", encoding="utf8") as f2:
     #     for line in ret:
