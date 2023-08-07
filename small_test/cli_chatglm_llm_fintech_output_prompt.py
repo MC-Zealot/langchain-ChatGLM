@@ -124,7 +124,7 @@ class OutPutPrompts:
                     questions_content = questions_dict['question']
                     questions_id = questions_dict['id']
                     # logger.info(str(datetime.now()) + "\t" +str(index)+"\t"+ questions_content)
-                    query = questions_content.replace('(','').replace(')','').replace("保留2位小数。", "").replace("保留两位小数。", "").replace("请保留两位小数。", "").replace("请以2位小数点形式回答。", "").replace("是多少元?", "").replace("是多少元？", "").replace("是多少?", "").replace("是多少?", "").replace("为多少?", "")
+                    query = questions_content.replace('(','').replace(')','')
                     year = self.get_year(query)
                     company_name = self.get_company(query)
                     prompt=''
@@ -144,12 +144,11 @@ class OutPutPrompts:
                             if type =='generic':
                                 vs_path_new='/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_extract2'
                                 index_name='index'
-                                prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=vs_path_new, index_name=index_name)
+                                prompt = self.local_doc_qa.get_prompt_based_query(query=query, vs_path=vs_path_new, index_name=index_name, ori_query=query)
                         else:
                             if type =='specific':
-                                # continue #暂时的，测试一下只找大数据库的速度
-                                filtered_query = replace_company_name_and_year_by_question(query, self.stock_names)
-                                prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name)
+                                filtered_query = replace_company_name_and_year_by_question(query, self.stock_names).replace("保留2位小数。", "").replace("保留两位小数。", "").replace("请保留两位小数。", "").replace("请以2位小数点形式回答。", "").replace("是多少元?", "").replace("是多少元？", "").replace("是多少?", "").replace("是多少?", "").replace("为多少?", "")
+                                prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name, ori_query=query)
                     else:
                         if type == 'generic':
                             logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))

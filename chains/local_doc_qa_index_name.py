@@ -145,7 +145,7 @@ def generate_prompt_v2(related_docs: List[str],
                     query: str,
                     prompt_template: str = PROMPT_TEMPLATE_V2, ) -> str:
     context = "\n".join([doc.page_content for doc in related_docs])
-    context=context[0:3000].replace('[','').replace(']','').replace(' ','')#chatglm6b最大的prompt是8898，所以不能超了字数，做截断
+    context=context[0:2800].replace(' ','')#chatglm6b最大的prompt是8898，所以不能超了字数，做截断
     prompt = prompt_template.replace("{question}", query).replace("{context}", context)
     return prompt
 
@@ -338,7 +338,7 @@ class LocalDocQA:
                         "source_documents": ''}
             yield response, history
 
-    def get_prompt_based_query(self, query, vs_path, index_name):
+    def get_prompt_based_query(self, query, vs_path, index_name,ori_query):
 
         vector_store = load_vector_store_by_index_name(vs_path, self.embeddings, index_name)
         vector_store.chunk_size = self.chunk_size
@@ -347,9 +347,9 @@ class LocalDocQA:
         related_docs_with_score = vector_store.similarity_search_with_score(query, k=self.top_k)
         torch_gc()
         if len(related_docs_with_score) > 0:
-            prompt = generate_prompt_v2(related_docs_with_score, query)
+            prompt = generate_prompt_v2(related_docs_with_score, ori_query)
         else:
-            prompt = query
+            prompt = ori_query
 
         return prompt
 
