@@ -20,6 +20,8 @@ from functools import lru_cache
 from textsplitter.zh_title_enhance import zh_title_enhance
 from langchain.chains.base import Chain
 import multiprocessing
+from langchain.agents import initialize_agent, Tool
+from langchain.agents import AgentType
 
 
 
@@ -163,6 +165,14 @@ class LocalDocQA:
         self.llm_model_chain = llm_model
         self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[embedding_model], model_kwargs={'device': embedding_device})
         self.top_k = top_k
+        tools = [
+            Tool(
+                name="Calculator",
+                func=self.llm_model_chain.run,
+                description="useful for when you need to answer questions about math"
+            )
+        ]
+        # self.agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
     def init_knowledge_vector_store(self, filepath: str or List[str], vs_path: str or os.PathLike = None, sentence_size=SENTENCE_SIZE):
         failed_files = []

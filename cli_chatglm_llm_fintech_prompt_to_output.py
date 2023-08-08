@@ -26,7 +26,7 @@ def main():
     logger.error("begins")
     logger.error("logger config is done")
     print("========================")
-    llm_model_ins = shared.loaderLLM()
+    llm_model_ins, llm = shared.loaderLLM_and_chain()
     llm_model_ins.history_len = LLM_HISTORY_LEN
     local_doc_qa = LocalDocQA()
     local_doc_qa.init_cfg(llm_model=llm_model_ins,

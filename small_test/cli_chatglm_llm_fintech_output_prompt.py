@@ -148,7 +148,8 @@ class OutPutPrompts:
                         else:
                             if type =='specific':
                                 filtered_query = replace_company_name_and_year_by_question(query, self.stock_names).replace("保留2位小数。", "").replace("保留两位小数。", "").replace("请保留两位小数。", "").replace("请以2位小数点形式回答。", "").replace("是多少元?", "").replace("是多少元？", "").replace("是多少?", "").replace("是多少?", "").replace("为多少?", "")
-                                prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name, ori_query=query)
+                                filtered_query2 = replace_company_name_and_year_by_question(query, self.stock_names)
+                                prompt = self.local_doc_qa.get_prompt_based_query(query=filtered_query, vs_path=self.vs_path, index_name=index_name, ori_query=filtered_query2)
                     else:
                         if type == 'generic':
                             logger.error("找不到公司名称！！！！！！第{questions_id}题： {query}" + str(questions_id) + "\t" + str(query))
@@ -189,7 +190,7 @@ if __name__ == "__main__":
     vs_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/faiss_vector_store_index_name" #向量库的路径
     # input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_questions.json" #输入的比赛问题的路径
     input_filepath="/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/test_questions.json" #输入的比赛问题的路径
-    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts20230808.json" #输出的prompt的路径
+    output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts20230808_v2.json" #输出的prompt的路径
     # output_path = "/home/zealot/yizhou/git/chatglm_llm_fintech_raw_dataset/small_test/test_prompts_tmp.json" #输出的prompt的路径
 
     opp.init_prompts(vs_path)
