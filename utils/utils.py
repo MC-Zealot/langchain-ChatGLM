@@ -1,4 +1,5 @@
 import os
+import json
 
 stock_names = []
 with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/6.txt", "r") as f:
@@ -95,6 +96,28 @@ def testcase_replace_company_name_and_year_by_question():
     query_new = replace_company_name_and_year_by_question(query, stock_names)
     prompt_new = prompt[0: start_index] + query_new
     print(prompt_new)
+
+
+def by_score(t):
+    return t[0]
+def sort_sumbit_json(input_path):
+    pre_path=input_path.split('.')[0]
+    out_put_path=pre_path+"_sort.json"
+
+    with open(input_path, "r") as f1, open(out_put_path, 'w', encoding="utf8") as f2:
+        input_lines = f1.readlines()
+        ret_list = []
+        for line in input_lines:
+            questions_dict = json.loads(line)
+            questions_id = int(questions_dict['id'])
+            ret_list.append([questions_id, line])
+
+        L2 = sorted(ret_list, key=by_score, reverse=False)
+        for line in L2:
+            f2.write(str(line[1]))
+        # print(ret_list[-10:])
+        # print(L2[-10:])
+    return out_put_path
 
 if __name__ == "__main__":
     all_companys_output("/all_company_short.txt")
