@@ -4,8 +4,8 @@ import json
 def by_score(t):
     return t[0]
 
-with open("/home/zealot/Downloads/submit_example_20230808_output.json", "r") as f1, \
-        open('/home/zealot/Downloads/submit_example_20230808_output_sort.json', 'w', encoding="utf8") as f2:
+with open("/Users/zealot/Downloads/submit_example_20230808_v2.json", "r") as f1, \
+        open('/Users/zealot/Downloads/submit_example_20230808_v2_output.json', 'w', encoding="utf8") as f2:
     lines = f1.readlines()
     ret_list=[]
     for line in lines:

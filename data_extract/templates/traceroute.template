@@ -1,0 +1,5 @@
+Value Hop (\d+)
+Value Ip (\S+)
+
+Start
+ ^  ${Hop} ${Ip} -> Record
