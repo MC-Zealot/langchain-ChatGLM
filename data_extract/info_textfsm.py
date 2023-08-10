@@ -44,6 +44,6 @@ print(fsm.header)
 comp_info={}
 for res in result:
     comp_info[res[0]] = res[1]
-    print(res[0] +"是：\t" +res[1])
-
+    # print(res[0] +"是：\t" +res[1])
+    print(res)
 # print(comp_info)
