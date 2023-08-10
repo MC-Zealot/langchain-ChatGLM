@@ -4,5 +4,4 @@ Value col3 (\S+)
 Value col4 (\S+)
 
 Start
- #^\[\'${col1}\', \'${col2}\', \'${col3}\', \'${col4}\'] -> Record
  ^\[\'${col1}\', \'${col2}\' -> Record
