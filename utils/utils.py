@@ -129,25 +129,80 @@ def get_all_pdf(cache_dir='/Users/zealot/yizhou/data/allpdf'):
 
 # {'name': ['2021-04-28__深圳市科陆电子科技股份有限公司__002121__科陆电子__2020年__年度报告.pdf'],
 # 'pdf:FILE': ['/mnt/workspace/taoyizhou/git/jinrong_data/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/968358a482fcd57054d8effb103f067efca8368839e73769a524b1a0813d5b78']}
-def get_company_pdf_file_mapping(file_path='/Users/zealot/yizhou/data/test'):
-    delimet="it/s]"
+def get_company_pdf_file_mapping(file_path='/Users/zealot/yizhou/data/download_data.log'):
+    delimet="{\'name\'"
+    ret={}
     with open(file_path, "r") as f:
         lines = f.readlines()
         for line in lines:
-            if(len(line.split(delimet))<=1):
-                continue
-            stock_name = line.split(delimet)[1]
-            j = eval(stock_name)
-            value=j['name'][0]
-            key = j['pdf:FILE'][0].split('/')[-1]
-            print(str(key)+"\t"+str(value))
-        f.close()
+            try:
+                if(len(line.split(delimet))<=1):
+                    continue
+                stock_name = "{'name'"+line.split(delimet)[1].strip()
+                # print(stock_name)
+                j = eval(stock_name)
+                value=j['name'][0]
+                key = j['pdf:FILE'][0].split('/')[-1]
+                ret[key]=value
+                # print(str(key)+"\t"+str(value))
+            except Exception as e:
+                print(e)
+                print(line)
+                # return
+    return ret
+
+def rename_all_pdf():
+    try:
+        os.rename("D:\\demo","D:\\new")
+        print("重命名完毕")
+    except(FileNotFoundError):
+        print("目录不存在")
 
 
 if __name__ == "__main__":
     # all_companys_output("/all_company_short.txt")
     # get_all_pdf();
-    get_company_pdf_file_mapping()
-    # l="{'name': ['2021-04-28__深圳市科陆电子科技股份有限公司__002121__科陆电子__2020年__年度报告.pdf'], 'pdf:FILE': ['/mnt/workspace/taoyizhou/git/jinrong_data/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/968358a482fcd57054d8effb103f067efca8368839e73769a524b1a0813d5b78']}"
+    mapping = get_company_pdf_file_mapping()
+    print(len(mapping))
+    # exit(0)
+    # l="{'name': ['2020-04-21__国光电器股份有限公司__002045__国光电器__2019年__年度报告.pdf'], 'pdf:FILE': ['/mnt/workspace/taoyizhou/git/jinrong_data/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/c9ff52b5a46b46a89e2e5677e4502d00851956ae691adf222ddecf3b1b04d1a2']}"
     # json.loads(l)
-    # a=eval(l)
+    # j=eval(l)
+    # value=j['name'][0]
+    # key = j['pdf:FILE'][0].split('/')[-1]
+    # print(str(key)+"\t"+str(value))
+    index = 0
+    input_path="/Users/zealot/yizhou/data/allpdf/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/"
+    input_path="/Users/zealot/yizhou/data/allpdf_test/"
+    output_path="/Users/zealot/yizhou/data/allpdf_test/"
+    # for key, val in mapping.items():
+    #     key= input_path +key
+    #     val= output_path +val
+    #     if index==10:
+    #         break
+    #     print("cp "+str(key) +" "+ val)
+    #     index+=1
+
+    for i, j, k in os.walk(input_path):
+        # print(i, j, k)
+        index = 0
+        while index < len(k):
+            file_path=str(i)+k[index]
+            # file_path = k[index]
+            # print(file_path)
+            # file_list.append(file_path)
+            file_name = k[index]
+            if file_name in mapping:
+                pdf_name = mapping[file_name]
+            else:
+                print(file_name+" is not in mapping!!!!!")
+                index += 1
+                continue
+            try:
+                val = output_path + pdf_name
+                os.rename(file_path, val)
+                # print("重命名完毕")
+            except(FileNotFoundError):
+                print("目录不存在"+str(file_path))
+            index += 1
+        break  # 非递归
