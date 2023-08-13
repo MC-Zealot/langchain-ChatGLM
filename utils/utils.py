@@ -1,13 +1,16 @@
+# -*- coding: utf-8 -*-
+
 import os
 import json
+from modelscope.msdatasets import MsDataset
 
-stock_names = []
-with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/6.txt", "r") as f:
-    lines = f.readlines()
-    for stock_mapping_one in lines:
-        stock_name = stock_mapping_one.split("\t")[1]
-        stock_names.append(stock_name)
-    f.close()
+# stock_names = []
+# with open("/home/zealot/yizhou/git/langchain-ChatGLM/data_extract/6.txt", "r") as f:
+#     lines = f.readlines()
+#     for stock_mapping_one in lines:
+#         stock_name = stock_mapping_one.split("\t")[1]
+#         stock_names.append(stock_name)
+#     f.close()
 
 
 def replace_company_name_and_year_by_question(question, stock_names):
@@ -119,5 +122,32 @@ def sort_sumbit_json(input_path):
         # print(L2[-10:])
     return out_put_path
 
+def get_all_pdf(cache_dir='/Users/zealot/yizhou/data/allpdf'):
+    ds = MsDataset.load('chatglm_llm_fintech_raw_dataset', split='train', use_streaming=True, stream_batch_size=5, cache_dir=cache_dir)
+    for item in ds:
+        print(item)
+
+# {'name': ['2021-04-28__深圳市科陆电子科技股份有限公司__002121__科陆电子__2020年__年度报告.pdf'],
+# 'pdf:FILE': ['/mnt/workspace/taoyizhou/git/jinrong_data/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/968358a482fcd57054d8effb103f067efca8368839e73769a524b1a0813d5b78']}
+def get_company_pdf_file_mapping(file_path='/Users/zealot/yizhou/data/test'):
+    delimet="it/s]"
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            if(len(line.split(delimet))<=1):
+                continue
+            stock_name = line.split(delimet)[1]
+            j = eval(stock_name)
+            value=j['name'][0]
+            key = j['pdf:FILE'][0].split('/')[-1]
+            print(str(key)+"\t"+str(value))
+        f.close()
+
+
 if __name__ == "__main__":
-    all_companys_output("/all_company_short.txt")
+    # all_companys_output("/all_company_short.txt")
+    # get_all_pdf();
+    get_company_pdf_file_mapping()
+    # l="{'name': ['2021-04-28__深圳市科陆电子科技股份有限公司__002121__科陆电子__2020年__年度报告.pdf'], 'pdf:FILE': ['/mnt/workspace/taoyizhou/git/jinrong_data/modelscope/chatglm_llm_fintech_raw_dataset/master/data_files/968358a482fcd57054d8effb103f067efca8368839e73769a524b1a0813d5b78']}"
+    # json.loads(l)
+    # a=eval(l)
